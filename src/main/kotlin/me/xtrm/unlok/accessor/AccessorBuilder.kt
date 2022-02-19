@@ -100,7 +100,7 @@ object AccessorBuilder {
             }
 
             // Getter
-            method(public, "get", valueType) {
+            val getter = method(public, "get", valueType) {
                 if (isStatic) {
                     // owner.field
                     getstatic(ownerClassName, fieldNode)
@@ -123,7 +123,7 @@ object AccessorBuilder {
                 exceptions +=
                     Type.getType("java/lang/IllegalAccessException")
             }
-            method(public, "set", Type.VOID_TYPE, primitiveEquivalent(valueType), exceptions = exceptions) {
+            val setter = method(public, "set", Type.VOID_TYPE, primitiveEquivalent(valueType), exceptions = exceptions) {
                 if (!isFinal) {
                     if (isStatic) {
                         aload_1
@@ -145,6 +145,22 @@ object AccessorBuilder {
                     invokespecial("java/lang/IllegalAccessException", "<init>", "(Ljava/lang/String;)V")
                     athrow
                 }
+            }
+
+            // bridge getter
+            method(public + synthetic + bridge, "get", "java/lang/Object") {
+                aload_0
+                invokevirtual(accessorClassName, getter)
+                areturn
+            }
+
+            // bridge setter
+            method(public + synthetic + bridge, "set", Type.VOID_TYPE, "java/lang/Object", exceptions = exceptions) {
+                aload_0
+                aload_1
+                checkcast(valueType)
+                invokevirtual(accessorClassName, setter)
+                _return
             }
         }.run(accessorClassLoader::load)
             .constructors[0]

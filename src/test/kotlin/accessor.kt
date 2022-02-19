@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 internal class FieldAccessorBuilderTests {
 
     @Test
-    fun `can build class`() {
+    fun canbuildclass() {
         val accessor: FieldAccessor<String> = AccessorBuilder.fieldAccessor(
             "POJO",
             "NAME"
