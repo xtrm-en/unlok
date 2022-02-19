@@ -14,6 +14,6 @@ fun <T> field(
     owner: Class<*>,
     fieldName: String = "",
     ownerInstance: Any? = null,
-): FieldDelegate<T> {
-    return field(owner.name, fieldName, ownerInstance)
-}
+): FieldDelegate<T> =
+    field(owner.name, fieldName, ownerInstance)
+

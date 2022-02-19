@@ -5,7 +5,7 @@ var magicAccessorClass: Class<*>? = null
     private set
 
 fun supportsCurrentVM(): Boolean {
-    if(!initialized) {
+    if (!initialized) {
         init()
     }
     return magicAccessorClass != null
@@ -19,7 +19,7 @@ private fun init() {
     } catch (exception: ClassNotFoundException) {
         try {
             Class.forName("jdk.internal.reflect.MagicAccessorImpl")
-        } catch(exception2: ClassNotFoundException) {
+        } catch (exception2: ClassNotFoundException) {
             throw exception
         }
     }

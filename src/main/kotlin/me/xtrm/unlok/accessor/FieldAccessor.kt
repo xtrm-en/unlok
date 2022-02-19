@@ -10,6 +10,4 @@ interface FieldAccessor<T> {
 
     fun set(value: T?)
 
-
-
 }

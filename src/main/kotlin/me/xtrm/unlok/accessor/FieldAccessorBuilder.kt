@@ -41,7 +41,7 @@ object FieldAccessorBuilder {
     ): FieldAccessor<T> {
         val classfilePath = "$ownerClass.class"
         var classfile = javaClass.classLoader.getResource("/$classfilePath")
-        if(classfile == null) {
+        if (classfile == null) {
             // gradle dev env bs
             classfile = javaClass.classLoader.getResource(classfilePath)
         }
@@ -80,7 +80,7 @@ object FieldAccessorBuilder {
 
             // Constructor
             var params = emptyArray<String>()
-            if(!isStatic) params += ownerClassName
+            if (!isStatic) params += ownerClassName
             method(public, "<init>", Type.VOID_TYPE, *params) {
                 // super()
                 aload_0
@@ -118,32 +118,38 @@ object FieldAccessorBuilder {
             var exceptions = emptyArray<Type>()
             if (isFinal) {
                 exceptions +=
-                    Type.getType("java/lang/IllegalAccessException")
+                    Type.getType("Ljava/lang/IllegalAccessException;")
             }
-            val setter = method(public, "set", Type.VOID_TYPE, primitiveEquivalent(valueType), exceptions = exceptions) {
-                if (!isFinal) {
-                    if (isStatic) {
-                        aload_1
-                        checkcast(valueType)
-                        putstatic(ownerClassName, fieldNode)
-                    } else {
-                        aload_0
-                        getfield(accessorClassName, "instance", ownerClassName)
-                        aload_1
-                        checkcast(valueType)
-                        putfield(ownerClassName, fieldNode)
-                    }
+            val setter =
+                method(public, "set", Type.VOID_TYPE, primitiveEquivalent(valueType), exceptions = exceptions) {
+                    if (!isFinal) {
+                        if (isStatic) {
+                            // owner.field
+                            aload_1
+                            checkcast(valueType)
 
-                    _return
-                } else {
-                    // throw new IllegalAccessException("nope lol")
-                    new("java/lang/IllegalAccessException")
-                    dup
-                    ldc("Cannot set final field $ownerClassName.${fieldNode.name}${fieldNode.desc}")
-                    invokespecial("java/lang/IllegalAccessException", "<init>", "(Ljava/lang/String;)V")
-                    athrow
+                            // owner.field = arg0
+                            putstatic(ownerClassName, fieldNode)
+                        } else {
+                            // this.instance
+                            aload_0
+                            getfield(accessorClassName, "instance", ownerClassName)
+
+                            aload_1
+                            checkcast(valueType)
+                            putfield(ownerClassName, fieldNode)
+                        }
+
+                        _return
+                    } else {
+                        // throw new IllegalAccessException("nope lol")
+                        new("java/lang/IllegalAccessException")
+                        dup
+                        ldc("Cannot set final field $ownerClassName.${fieldNode.name}${fieldNode.desc}")
+                        invokespecial("java/lang/IllegalAccessException", "<init>", "(Ljava/lang/String;)V")
+                        athrow
+                    }
                 }
-            }
 
             // bridge getter
             method(public + synthetic + bridge, "get", "java/lang/Object") {
@@ -163,7 +169,7 @@ object FieldAccessorBuilder {
         }.run(AccessorClassLoader::load)
             .constructors[0]
             .run {
-                if(isStatic) newInstance() else newInstance(ownerInstance)
+                if (isStatic) newInstance() else newInstance(ownerInstance)
             } as FieldAccessor<T>
     }
 
