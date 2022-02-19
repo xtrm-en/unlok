@@ -42,7 +42,7 @@ object FieldAccessorBuilder {
         val classfilePath = "$ownerClass.class"
         var classfile = javaClass.classLoader.getResource("/$classfilePath")
         if(classfile == null) {
-            // gradle???
+            // gradle dev env bs
             classfile = javaClass.classLoader.getResource(classfilePath)
         }
         assert(classfile != null) { "Unknown class: $classfilePath" }
@@ -68,8 +68,6 @@ object FieldAccessorBuilder {
 
         val isStatic = (fieldNode.access and Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC
         val isFinal = (fieldNode.access and Opcodes.ACC_FINAL) == Opcodes.ACC_FINAL
-
-        println("Creating accessor for $ownerClassName.${fieldNode.name}${fieldNode.desc} ($isStatic, $isFinal)")
 
         val accessorClassName = "unlok/accessor\$${accessorIndex.getAndIncrement()}\$${fieldNode.name}"
         return assembleClass(public,
