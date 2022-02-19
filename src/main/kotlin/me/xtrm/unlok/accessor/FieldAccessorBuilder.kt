@@ -21,9 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger
  * @since 0.0.1
  */
 @Suppress("UNCHECKED_CAST")
-object AccessorBuilder {
+object FieldAccessorBuilder {
     private var unlokSuperclass: ClassNode
-    private val accessorClassLoader = AccessorClassLoader()
     private val accessorIndex = AtomicInteger(0)
 
     init {
@@ -32,7 +31,7 @@ object AccessorBuilder {
         unlokSuperclass = assembleClass(
             public, basePackage + "UnlokSupermagic" + UUID.randomUUID().toString().replace("-", ""),
             superName = basePackage + "MagicAccessorImpl"
-        ) {}.also(accessorClassLoader::load)
+        ) {}.also(AccessorClassLoader::load)
     }
 
     fun <T> fieldAccessor(
@@ -131,6 +130,7 @@ object AccessorBuilder {
                         putstatic(ownerClassName, fieldNode)
                     } else {
                         aload_0
+                        getfield(accessorClassName, "instance", ownerClassName)
                         aload_1
                         checkcast(valueType)
                         putfield(ownerClassName, fieldNode)
@@ -162,7 +162,7 @@ object AccessorBuilder {
                 invokevirtual(accessorClassName, setter)
                 _return
             }
-        }.run(accessorClassLoader::load)
+        }.run(AccessorClassLoader::load)
             .constructors[0]
             .run {
                 if(isStatic) newInstance() else newInstance(ownerInstance)

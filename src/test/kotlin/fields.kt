@@ -6,7 +6,7 @@ internal class FieldAccessorTests {
 
     @Test
     fun `can access private static fields`() {
-        var name by field<String>(PrivateFieldHolder.Companion::class.java, "NAME")
+        var name by field<String>(PrivateFieldHolder::class.java, "NAME")
 
         assertEquals(name, "John")
         name = "Doe"
@@ -18,8 +18,12 @@ internal class FieldAccessorTests {
     @Test
     fun `can access private virtual fields`() {
         val holder = PrivateFieldHolder("Jhonny")
-        var surname by field<String>(PrivateFieldHolder::class.java, "surname", holder)
+        assertEquals(holder.surnameGetter(), "Jhonny")
 
+        var surname by field<String>(PrivateFieldHolder::class.java, "surname", holder)
+        surname = "Doey"
+
+        assertEquals(surname, "Doey")
         assertEquals(holder.surnameGetter(), "Doey")
     }
 
