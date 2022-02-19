@@ -10,7 +10,7 @@ import java.io.FileOutputStream
  * @author xtrm-en
  * @since 0.0.1
  */
-class AccessorClassLoader: ClassLoader(Unlok::class.java.classLoader) {
+object AccessorClassLoader: ClassLoader(Unlok::class.java.classLoader) {
 
     /**
      * Loads a class by the class name and the bytecode.
