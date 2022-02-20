@@ -3,15 +3,16 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Suppress("LocalVariableName")
 internal class FieldAccessorTests {
 
     @Test
     fun `can access private static fields`() {
-        var name by field<String>(PrivateFieldHolder::class.java, "NAME")
+        var NAME by field<String>(PrivateFieldHolder::class.java)
 
-        assertEquals(name, "John")
-        name = "Doe"
-        assertEquals(name, "Doe")
+        assertEquals(NAME, "John")
+        NAME = "Doe"
+        assertEquals(NAME, "Doe")
 
         assertEquals(PrivateFieldHolder.nameGetter(), "Doe")
     }
