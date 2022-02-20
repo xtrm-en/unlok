@@ -1,7 +1,7 @@
 object Coordinates {
     const val NAME = "unlok"
     const val DESC = "Unlock your JVM, access any field or method without Reflection."
-    const val REPO_ID = "stardust-enterprises/$NAME"
+    const val REPO_ID = "xtrm-en/$NAME"
 
     const val GROUP = "me.xtrm"
     const val VERSION = "0.1.0"
