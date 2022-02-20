@@ -30,5 +30,4 @@ object Unlok {
 
         return FieldDelegate(className, fieldName, ownerInstance)
     }
-
 }

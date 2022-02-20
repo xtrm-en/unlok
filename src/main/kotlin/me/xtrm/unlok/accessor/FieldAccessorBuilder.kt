@@ -27,10 +27,10 @@ object FieldAccessorBuilder {
     private val accessorIndex = AtomicInteger(0)
 
     init {
-        val basePackage = (magicAccessorClass?.`package`?.name?.replace('.', '/')
-            ?: "sun/reflect") + '/'
+        val basePackage = (magicAccessorClass?.`package`?.name?.replace('.', '/') ?: "sun/reflect") + '/'
         unlokSuperclass = assembleClass(
-            public, basePackage + "UnlokSupermagic" + UUID.randomUUID().toString().replace("-", ""),
+            public,
+            basePackage + "UnlokSupermagic" + UUID.randomUUID().toString().replace("-", ""),
             superName = basePackage + "MagicAccessorImpl"
         ) {}.also(AccessorClassLoader::load)
     }
@@ -71,10 +71,12 @@ object FieldAccessorBuilder {
         val isFinal = (fieldNode.access and Opcodes.ACC_FINAL) == Opcodes.ACC_FINAL
 
         val accessorClassName = "unlok/accessor\$${accessorIndex.getAndIncrement()}\$${fieldNode.name}"
-        return assembleClass(public,
+        return assembleClass(
+            public,
             accessorClassName,
             superName = unlokSuperclass.name,
-            interfaces = listOf(FieldAccessor::class.java)) {
+            interfaces = listOf(FieldAccessor::class.java)
+        ) {
             if (!isStatic) {
                 field(private + final, "instance", ownerClassName)
             }
@@ -118,8 +120,7 @@ object FieldAccessorBuilder {
             // Setter
             var exceptions = emptyArray<Type>()
             if (isFinal) {
-                exceptions +=
-                    Type.getType("Ljava/lang/IllegalAccessException;")
+                exceptions += Type.getType("Ljava/lang/IllegalAccessException;")
             }
             val setter =
                 method(public, "set", Type.VOID_TYPE, primitiveEquivalent(valueType), exceptions = exceptions) {
@@ -167,54 +168,50 @@ object FieldAccessorBuilder {
                 invokevirtual(accessorClassName, setter)
                 _return
             }
-        }.run(AccessorClassLoader::load)
-            .constructors[0]
-            .run {
-                if (isStatic) newInstance() else newInstance(ownerInstance)
-            } as FieldAccessor<T>
+        }.run(AccessorClassLoader::load).constructors[0].run {
+            if (isStatic) newInstance() else newInstance(ownerInstance)
+        } as FieldAccessor<T>
     }
 
     // From: https://github.com/cbyrneee/Injector/ @ InjectorClassTransformer.kt
-    private fun primitiveConversionInsnList(type: Type): InsnList =
-        assembleBlock {
-            when (type.sort) {
-                Type.INT -> {
-                    invokestatic(java.lang.Integer::class, "valueOf", java.lang.Integer::class, int)
-                }
-                Type.FLOAT -> {
-                    invokestatic(java.lang.Float::class, "valueOf", java.lang.Float::class, float)
-                }
-                Type.LONG -> {
-                    invokestatic(java.lang.Long::class, "valueOf", java.lang.Long::class, long)
-                }
-                Type.DOUBLE -> {
-                    invokestatic(java.lang.Double::class, "valueOf", java.lang.Double::class, double)
-                }
-                Type.BOOLEAN -> {
-                    invokestatic(java.lang.Boolean::class, "valueOf", java.lang.Boolean::class, boolean)
-                }
-                Type.SHORT -> {
-                    invokestatic(java.lang.Short::class, "valueOf", java.lang.Short::class, short)
-                }
-                Type.BYTE -> {
-                    invokestatic(java.lang.Byte::class, "valueOf", java.lang.Byte::class, byte)
-                }
-                Type.CHAR -> {
-                    invokestatic(java.lang.Character::class, "valueOf", java.lang.Character::class, char)
-                }
-            }
-        }.first
-
-    private fun primitiveEquivalent(type: Type): Type =
+    private fun primitiveConversionInsnList(type: Type): InsnList = assembleBlock {
         when (type.sort) {
-            Type.INT -> Type.getType(java.lang.Integer::class.java)
-            Type.FLOAT -> Type.getType(java.lang.Float::class.java)
-            Type.LONG -> Type.getType(java.lang.Long::class.java)
-            Type.DOUBLE -> Type.getType(java.lang.Double::class.java)
-            Type.BOOLEAN -> Type.getType(java.lang.Boolean::class.java)
-            Type.SHORT -> Type.getType(java.lang.Short::class.java)
-            Type.BYTE -> Type.getType(java.lang.Byte::class.java)
-            Type.CHAR -> Type.getType(java.lang.Character::class.java)
-            else -> type
+            Type.INT -> {
+                invokestatic(java.lang.Integer::class, "valueOf", java.lang.Integer::class, int)
+            }
+            Type.FLOAT -> {
+                invokestatic(java.lang.Float::class, "valueOf", java.lang.Float::class, float)
+            }
+            Type.LONG -> {
+                invokestatic(java.lang.Long::class, "valueOf", java.lang.Long::class, long)
+            }
+            Type.DOUBLE -> {
+                invokestatic(java.lang.Double::class, "valueOf", java.lang.Double::class, double)
+            }
+            Type.BOOLEAN -> {
+                invokestatic(java.lang.Boolean::class, "valueOf", java.lang.Boolean::class, boolean)
+            }
+            Type.SHORT -> {
+                invokestatic(java.lang.Short::class, "valueOf", java.lang.Short::class, short)
+            }
+            Type.BYTE -> {
+                invokestatic(java.lang.Byte::class, "valueOf", java.lang.Byte::class, byte)
+            }
+            Type.CHAR -> {
+                invokestatic(java.lang.Character::class, "valueOf", java.lang.Character::class, char)
+            }
         }
+    }.first
+
+    private fun primitiveEquivalent(type: Type): Type = when (type.sort) {
+        Type.INT -> Type.getType(java.lang.Integer::class.java)
+        Type.FLOAT -> Type.getType(java.lang.Float::class.java)
+        Type.LONG -> Type.getType(java.lang.Long::class.java)
+        Type.DOUBLE -> Type.getType(java.lang.Double::class.java)
+        Type.BOOLEAN -> Type.getType(java.lang.Boolean::class.java)
+        Type.SHORT -> Type.getType(java.lang.Short::class.java)
+        Type.BYTE -> Type.getType(java.lang.Byte::class.java)
+        Type.CHAR -> Type.getType(java.lang.Character::class.java)
+        else -> type
+    }
 }

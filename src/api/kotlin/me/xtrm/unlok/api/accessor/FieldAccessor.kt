@@ -5,9 +5,6 @@ package me.xtrm.unlok.api.accessor
  * @since 0.0.1
  */
 interface FieldAccessor<T> {
-
     fun get(): T?
-
     fun set(value: T?)
-
 }
