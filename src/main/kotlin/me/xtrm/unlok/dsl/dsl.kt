@@ -16,4 +16,3 @@ fun <T> field(
     ownerInstance: Any? = null,
 ): FieldDelegate<T> =
     field(owner.name, fieldName, ownerInstance)
-
