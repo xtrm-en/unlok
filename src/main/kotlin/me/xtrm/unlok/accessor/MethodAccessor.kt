@@ -1,5 +1,5 @@
 package me.xtrm.unlok.accessor
 
-interface MethodAccessor<O, T> {
-    fun invoke(owner: O, vararg args: Any): T
+interface MethodAccessor<T> {
+    fun invoke(vararg args: Any): T
 }
