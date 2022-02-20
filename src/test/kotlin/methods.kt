@@ -7,7 +7,6 @@ internal class MethodAccessorTests {
             .invoke<String>()
     }
      */
-
 }
 
 internal class PrivateMethodHolder {

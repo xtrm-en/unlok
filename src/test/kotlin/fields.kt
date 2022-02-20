@@ -39,7 +39,6 @@ internal class FieldAccessorTests {
             name = "Other Name"
         }
     }
-
 }
 
 internal class PrivateFieldHolder(

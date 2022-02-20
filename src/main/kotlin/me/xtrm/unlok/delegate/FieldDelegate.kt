@@ -30,5 +30,4 @@ class FieldDelegate<T>(
         }
         accessor!!.set(value)
     }
-
 }
