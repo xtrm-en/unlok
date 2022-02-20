@@ -1,4 +1,4 @@
-package me.xtrm.unlok.accessor
+package me.xtrm.unlok.api.accessor
 
 /**
  * @author xtrm-en

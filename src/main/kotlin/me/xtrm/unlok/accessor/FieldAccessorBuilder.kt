@@ -4,6 +4,7 @@ import codes.som.anthony.koffee.assembleBlock
 import codes.som.anthony.koffee.assembleClass
 import codes.som.anthony.koffee.insns.jvm.*
 import codes.som.anthony.koffee.modifiers.public
+import me.xtrm.unlok.api.accessor.FieldAccessor
 import me.xtrm.unlok.utils.magicAccessorClass
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
