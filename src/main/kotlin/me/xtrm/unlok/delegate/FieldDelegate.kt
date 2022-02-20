@@ -1,7 +1,7 @@
 package me.xtrm.unlok.delegate
 
-import me.xtrm.unlok.accessor.FieldAccessor
 import me.xtrm.unlok.accessor.FieldAccessorBuilder
+import me.xtrm.unlok.api.accessor.FieldAccessor
 import kotlin.reflect.KProperty
 
 /**
