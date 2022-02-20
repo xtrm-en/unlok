@@ -3,8 +3,8 @@ object Coordinates {
     const val DESC = "Unlock your JVM, access any field or method without Reflection."
     const val REPO_ID = "stardust-enterprises/$NAME"
 
-    const val GROUP = "fr.stardustenterprises"
-    const val VERSION = "0.0.1"
+    const val GROUP = "me.xtrm"
+    const val VERSION = "0.1.0"
 }
 
 object Pom {
