@@ -1,9 +1,18 @@
 plugins {
-    kotlin("jvm") version "1.6.10"
+    `java-library`
+    kotlin("jvm") version Plugins.KOTLIN
+    id("org.jetbrains.dokka") version Plugins.DOKKA
+    `maven-publish`
+    signing
+    id("io.github.gradle-nexus.publish-plugin") version Plugins.NEXUS_PUBLISH
+    id("org.jlleitschuh.gradle.ktlint") version Plugins.KTLINT
 }
 
-group = "me.xtrm"
-version = "0.0.1-SNAPSHOT"
+val jvmTarget = "1.8"
+addApiSourceSet()
+
+group = Coordinates.GROUP
+version = Coordinates.VERSION
 
 repositories {
     mavenCentral()
@@ -11,17 +20,40 @@ repositories {
 }
 
 dependencies {
-    listOf("stdlib", "reflect").forEach {
-        implementation("org.jetbrains.kotlin", "kotlin-$it", "1.6.10")
+    Dependencies.kotlinModules.forEach {
+        implementation("org.jetbrains.kotlin", "kotlin-$it", Dependencies.KOTLIN)
     }
-    listOf("asm", "asm-tree").forEach {
-        implementation("org.ow2.asm", it, "9.2")
-    }
-    implementation("codes.som.anthony", "koffee", "8.0.2")
 
-    testImplementation("org.jetbrains.kotlin", "kotlin-test", "1.6.10")
+    listOf("asm", "asm-tree").forEach {
+        implementation("org.ow2.asm", it, Dependencies.ASM)
+    }
+    implementation("codes.som.anthony", "koffee", Dependencies.KOFFEE)
+
+    testImplementation("org.jetbrains.kotlin", "kotlin-test", Dependencies.KOTLIN)
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks {
+    test {
+        useJUnitPlatform()
+    }
+    compileKotlin {
+        kotlinOptions.jvmTarget = jvmTarget
+    }
+    compileJava {
+        targetCompatibility = jvmTarget
+        sourceCompatibility = jvmTarget
+    }
+}
+
+addDefaultArtifacts()
+
+setupMavenPublications()
+
+nexusPublishing.repositories.sonatype {
+    nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+    snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+
+    // Skip this step if environment variables NEXUS_USERNAME or NEXUS_PASSWORD aren't set.
+    username.set(properties["NEXUS_USERNAME"] as? String ?: return@sonatype)
+    password.set(properties["NEXUS_PASSWORD"] as? String ?: return@sonatype)
 }
