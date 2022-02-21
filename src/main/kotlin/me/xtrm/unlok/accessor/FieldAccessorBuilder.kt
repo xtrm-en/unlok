@@ -13,6 +13,7 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.InsnList
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -25,6 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger
 object FieldAccessorBuilder {
     private var unlokSuperclass: ClassNode
     private val accessorIndex = AtomicInteger(0)
+
+    private val virtualCache: MutableMap<Int, FieldAccessor<*>> = mutableMapOf()
+    private val staticCache: MutableMap<Int, FieldAccessor<*>> = mutableMapOf()
 
     init {
         val basePackage = (magicAccessorClass?.`package`?.name?.replace('.', '/') ?: "sun/reflect") + '/'
@@ -65,8 +69,21 @@ object FieldAccessorBuilder {
         fieldNode: FieldNode,
         ownerInstance: Any?,
     ): FieldAccessor<T> {
-        println("Building accessor for ${ownerNode.name}.${fieldNode.name}:${fieldNode.desc}")
+        val isStatic = (fieldNode.access and Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC
+        val hashKey = Objects.hash(ownerNode.name, fieldNode.name, fieldNode.desc, fieldNode.signature)
 
+        val cache = if (isStatic) staticCache else virtualCache
+        return cache.computeIfAbsent(hashKey) {
+            return@computeIfAbsent buildFieldAccessor<T>(ownerNode, fieldNode, ownerInstance)
+        } as FieldAccessor<T>
+    }
+
+    private fun <T> buildFieldAccessor(
+        ownerNode: ClassNode,
+        fieldNode: FieldNode,
+        ownerInstance: Any?,
+    ): FieldAccessor<T> {
+        println("Building")
         val ownerClassName = ownerNode.name
         val valueType = Type.getType(fieldNode.desc)
         val fieldType = Type.getType("Ljava/lang/reflect/Field;")
