@@ -49,7 +49,7 @@ tasks {
     }
 }
 
-addDefaultArtifacts()
+// addDefaultArtifacts()
 
 setupMavenPublications()
 
