@@ -33,7 +33,10 @@ dependencies {
 }
 
 ktlint {
-    this.disabledRules.add("no-wildcard-imports")
+    this.disabledRules.apply {
+        add("no-wildcard-imports")
+        add("filename")
+    }
 }
 
 tasks {
