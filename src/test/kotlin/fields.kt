@@ -1,5 +1,6 @@
+
 import me.xtrm.unlok.dsl.field
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.assertDoesNotThrow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -8,7 +9,7 @@ internal class FieldAccessorTests {
 
     @Test
     fun `can access private static fields`() {
-        var NAME by field<String>(PrivateFieldHolder::class.java)
+        var NAME by field<String>(PrivateFieldHolder::class)
 
         assertEquals(NAME, "John")
         NAME = "Doe"
@@ -22,7 +23,7 @@ internal class FieldAccessorTests {
         val holder = PrivateFieldHolder("Jhonny")
         assertEquals(holder.surnameGetter(), "Jhonny")
 
-        var surname by field<String>(PrivateFieldHolder::class.java, ownerInstance = holder)
+        var surname by field<String>(PrivateFieldHolder::class, ownerInstance = holder)
         surname = "Doey"
 
         assertEquals(surname, "Doey")
@@ -32,12 +33,15 @@ internal class FieldAccessorTests {
     @Test
     fun `can access final fields`() {
         val holder = FinalFieldHolder("John")
-        var name by field<String>(FinalFieldHolder::class.java, ownerInstance = holder)
+        var name by field<String>(FinalFieldHolder::class, ownerInstance = holder)
 
         assertEquals(name, "John")
-        assertThrows<IllegalAccessException> {
+
+        assertDoesNotThrow {
             name = "Other Name"
         }
+
+        assertEquals(name, "Other Name")
     }
 }
 

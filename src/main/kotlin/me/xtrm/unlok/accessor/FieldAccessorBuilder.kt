@@ -5,6 +5,7 @@ import codes.som.anthony.koffee.assembleClass
 import codes.som.anthony.koffee.insns.jvm.*
 import codes.som.anthony.koffee.modifiers.public
 import me.xtrm.unlok.api.accessor.FieldAccessor
+import me.xtrm.unlok.utils.AccessorUtils
 import me.xtrm.unlok.utils.magicAccessorClass
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
@@ -12,7 +13,6 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.InsnList
-import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -30,7 +30,7 @@ object FieldAccessorBuilder {
         val basePackage = (magicAccessorClass?.`package`?.name?.replace('.', '/') ?: "sun/reflect") + '/'
         unlokSuperclass = assembleClass(
             public,
-            basePackage + "UnlokSupermagic" + UUID.randomUUID().toString().replace("-", ""),
+            basePackage + "UnlokAccessor",
             superName = basePackage + "MagicAccessorImpl"
         ) {}.also(AccessorClassLoader::load)
     }
@@ -59,13 +59,18 @@ object FieldAccessorBuilder {
         return fieldAccessor(classNode, fieldNode, ownerInstance)
     }
 
+    @Suppress("UNUSED_VALUE")
     private fun <T> fieldAccessor(
         ownerNode: ClassNode,
         fieldNode: FieldNode,
         ownerInstance: Any?,
     ): FieldAccessor<T> {
+        println("Building accessor for ${ownerNode.name}.${fieldNode.name}:${fieldNode.desc}")
+
         val ownerClassName = ownerNode.name
         val valueType = Type.getType(fieldNode.desc)
+        val fieldType = Type.getType("Ljava/lang/reflect/Field;")
+        val objectType = Type.getType("Ljava/lang/Object;")
 
         val isStatic = (fieldNode.access and Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC
         val isFinal = (fieldNode.access and Opcodes.ACC_FINAL) == Opcodes.ACC_FINAL
@@ -80,6 +85,9 @@ object FieldAccessorBuilder {
             if (!isStatic) {
                 field(private + final, "instance", ownerClassName)
             }
+            if (isFinal) {
+                field(private, "finalField", fieldType)
+            }
 
             // Constructor
             var params = emptyArray<String>()
@@ -87,7 +95,7 @@ object FieldAccessorBuilder {
             method(public, "<init>", Type.VOID_TYPE, *params) {
                 // super()
                 aload_0
-                invokespecial("java/lang/Object", "<init>", "()V")
+                invokespecial(objectType, "<init>", "()V")
 
                 if (!isStatic) {
                     // this.instance = instance
@@ -118,17 +126,52 @@ object FieldAccessorBuilder {
             }
 
             // Setter
-            var exceptions = emptyArray<Type>()
-            if (isFinal) {
-                exceptions += Type.getType("Ljava/lang/IllegalAccessException;")
-            }
             val setter =
-                method(public, "set", Type.VOID_TYPE, primitiveEquivalent(valueType), exceptions = exceptions) {
-                    if (!isFinal) {
+                method(public, "set", Type.VOID_TYPE, primitiveEquivalent(valueType)) {
+                    if (isFinal) {
+                        // if the field is final, we have to use reflection
+                        val accessorUtilsClassName = AccessorUtils::class.java.name.replace('.', '/')
+
+                        aload_0
+                        getfield(accessorClassName, "finalField", fieldType)
+                        ifnonnull(L["call"])
+
+                        aload_0
+                        ldc(Type.getType("L$ownerClassName;"))
+                        ldc(fieldNode.name)
+                        invokestatic(
+                            accessorUtilsClassName,
+                            "setupFinalField",
+                            fieldType,
+                            "java/lang/Class",
+                            "java/lang/String"
+                        )
+                        putfield(accessorClassName, "finalField", fieldType)
+
+                        +L["call"]
+                        aload_0
+                        getfield(accessorClassName, "finalField", fieldType)
+                        if (isStatic) {
+                            aconst_null
+                            aload_0
+                        } else {
+                            aload_0
+                            getfield(accessorClassName, "instance", ownerClassName)
+                            aload_1
+                        }
+                        invokestatic(
+                            accessorUtilsClassName,
+                            "setFinalField",
+                            Type.VOID_TYPE,
+                            fieldType,
+                            objectType,
+                            objectType
+                        )
+                    } else {
                         if (isStatic) {
                             // owner.field
                             aload_1
-                            checkcast(valueType)
+                            instructions.add(primitiveRetreiveInsnList(valueType))
 
                             // owner.field = arg0
                             putstatic(ownerClassName, fieldNode)
@@ -137,36 +180,31 @@ object FieldAccessorBuilder {
                             aload_0
                             getfield(accessorClassName, "instance", ownerClassName)
 
+                            // this.instance.field = arg1
                             aload_1
-                            checkcast(valueType)
+                            instructions.add(primitiveRetreiveInsnList(valueType))
                             putfield(ownerClassName, fieldNode)
                         }
-
-                        _return
-                    } else {
-                        // throw new IllegalAccessException("nope lol")
-                        new("java/lang/IllegalAccessException")
-                        dup
-                        ldc("Cannot set final field $ownerClassName.${fieldNode.name}${fieldNode.desc}")
-                        invokespecial("java/lang/IllegalAccessException", "<init>", "(Ljava/lang/String;)V")
-                        athrow
                     }
+                    _return
                 }
 
-            // bridge getter
-            method(public + synthetic + bridge, "get", "java/lang/Object") {
-                aload_0
-                invokevirtual(accessorClassName, getter)
-                areturn
-            }
+            if (!valueType.internalName.equals("java/lang/Object")) {
+                // bridge getter
+                method(public + synthetic + bridge, "get", objectType) {
+                    aload_0
+                    invokevirtual(accessorClassName, getter)
+                    areturn
+                }
 
-            // bridge setter
-            method(public + synthetic + bridge, "set", Type.VOID_TYPE, "java/lang/Object", exceptions = exceptions) {
-                aload_0
-                aload_1
-                checkcast(valueType)
-                invokevirtual(accessorClassName, setter)
-                _return
+                // bridge setter
+                method(public + synthetic + bridge, "set", Type.VOID_TYPE, objectType) {
+                    aload_0
+                    aload_1
+                    checkcast(primitiveEquivalent(valueType))
+                    invokevirtual(accessorClassName, setter)
+                    _return
+                }
             }
         }.run(AccessorClassLoader::load).constructors[0].run {
             if (isStatic) newInstance() else newInstance(ownerInstance)
@@ -199,6 +237,35 @@ object FieldAccessorBuilder {
             }
             Type.CHAR -> {
                 invokestatic(java.lang.Character::class, "valueOf", java.lang.Character::class, char)
+            }
+        }
+    }.first
+
+    private fun primitiveRetreiveInsnList(type: Type): InsnList = assembleBlock {
+        when (type.sort) {
+            Type.INT -> {
+                invokevirtual(java.lang.Integer::class, "intValue", int)
+            }
+            Type.FLOAT -> {
+                invokevirtual(java.lang.Float::class, "floatValue", float)
+            }
+            Type.LONG -> {
+                invokevirtual(java.lang.Long::class, "longValue", long)
+            }
+            Type.DOUBLE -> {
+                invokevirtual(java.lang.Double::class, "doubleValue", double)
+            }
+            Type.BOOLEAN -> {
+                invokevirtual(java.lang.Boolean::class, "booleanValue", boolean)
+            }
+            Type.SHORT -> {
+                invokevirtual(java.lang.Short::class, "shortValue", short)
+            }
+            Type.BYTE -> {
+                invokevirtual(java.lang.Byte::class, "byteValue", byte)
+            }
+            Type.CHAR -> {
+                invokevirtual(java.lang.Character::class, "charValue", char)
             }
         }
     }.first
