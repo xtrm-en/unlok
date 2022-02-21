@@ -15,6 +15,12 @@ class FieldDelegate<T>(
 ) {
     private var accessor: FieldAccessor<T>? = null
 
+    init {
+        if (fieldName.isNotBlank()) {
+            this.accessor = FieldAccessorBuilder.fieldAccessor(ownerClass, fieldName, owner)
+        }
+    }
+
     operator fun getValue(t: T?, property: KProperty<*>): T? {
         if (accessor == null) {
             val name = fieldName.ifBlank { property.name }
