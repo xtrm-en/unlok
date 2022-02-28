@@ -1,3 +1,5 @@
+import java.net.URL
+
 plugins {
     `java-library`
     kotlin("jvm") version Plugins.KOTLIN
@@ -9,7 +11,7 @@ plugins {
 }
 
 val jvmTarget = "1.8"
-addApiSourceSet()
+val apiSourceSet = true
 
 group = Coordinates.GROUP
 version = Coordinates.VERSION
@@ -32,17 +34,33 @@ dependencies {
     testImplementation("org.jetbrains.kotlin", "kotlin-test", Dependencies.KOTLIN)
 }
 
-ktlint {
-    this.disabledRules.apply {
-        add("no-wildcard-imports")
-        add("filename")
+if (apiSourceSet) {
+    sourceSets {
+        val main by getting
+        val test by getting
+
+        val api by creating {
+            java.srcDir("src/api/kotlin")
+            resources.srcDir("src/api/resources")
+
+            this.compileClasspath += main.compileClasspath
+            this.runtimeClasspath += main.runtimeClasspath
+        }
+
+        listOf(main, test).forEach {
+            it.compileClasspath += api.output
+            it.runtimeClasspath += api.output
+        }
     }
 }
 
 tasks {
+    // Use JUnit as a testing framework
     test {
         useJUnitPlatform()
     }
+
+    // Set the Java compilation target version
     compileKotlin {
         kotlinOptions.jvmTarget = jvmTarget
     }
@@ -50,11 +68,155 @@ tasks {
         targetCompatibility = jvmTarget
         sourceCompatibility = jvmTarget
     }
+
+    // Configure dokka's renderer
+    dokkaHtml {
+        val moduleFile = File(projectDir, "MODULE.temp.MD")
+
+        run {
+            // In order to have a description on the rendered docs, we have to have
+            // a file with the # Module thingy in it. That's what we're
+            // automagically creating here.
+
+            doFirst {
+                moduleFile.writeText("# Module ${Coordinates.NAME}\n${Coordinates.DESC}")
+            }
+
+            doLast {
+                moduleFile.delete()
+            }
+        }
+
+        moduleName.set(Coordinates.NAME)
+
+        dokkaSourceSets.configureEach {
+            displayName.set(Coordinates.NAME)
+            includes.from(moduleFile.path)
+
+            skipDeprecated.set(false)
+            includeNonPublic.set(false)
+            skipEmptyPackages.set(true)
+            reportUndocumented.set(true)
+
+            sourceRoots.from(file("src/api/kotlin"))
+
+            // Link the source to the documentation
+            sourceLink {
+                localDirectory.set(file("src"))
+                remoteUrl.set(URL("https://github.com/${Coordinates.REPO_ID}/tree/trunk/src"))
+            }
+        }
+    }
+
+    // The original artifact, we just have to add the API source output and the
+    // LICENSE file.
+    jar {
+        if (apiSourceSet) {
+            from(sourceSets["api"].output)
+        }
+        from("LICENSE")
+    }
+
+    if (apiSourceSet) {
+        // API artifact, only including the output of the API source and the
+        // LICENSE file.
+        create("apiJar", Jar::class) {
+            group = "build"
+
+            archiveClassifier.set("api")
+            from(sourceSets["api"].output)
+
+            from("LICENSE")
+        }
+    }
+
+    // Source artifact, including everything the 'main' does but not compiled.
+    create("sourcesJar", Jar::class) {
+        group = "build"
+
+        archiveClassifier.set("sources")
+        from(sourceSets["main"].allSource)
+        if (apiSourceSet) {
+            from(sourceSets["api"].allSource)
+        }
+
+        from("LICENSE")
+    }
+
+    // The Javadoc artifact, containing the Dokka output and the LICENSE file.
+    create("javadocJar", Jar::class) {
+        group = "build"
+
+        archiveClassifier.set("javadoc")
+        dependsOn(dokkaHtml)
+        from(dokkaHtml)
+
+        from("LICENSE")
+    }
 }
 
-// addDefaultArtifacts()
+// List all artifact tasks
+val artifactTasks = arrayOf(
+    tasks["apiJar"],
+    tasks["sourcesJar"],
+    tasks["javadocJar"]
+)
 
-setupMavenPublications()
+// Add our artifacts to the build process
+artifacts {
+    artifactTasks.forEach(::archives)
+}
+
+// Disable unwanted linting rules
+ktlint {
+    this.disabledRules.apply {
+        add("no-wildcard-imports")
+        add("filename")
+    }
+}
+
+// Sets up the Maven publication.
+publishing.publications {
+    create<MavenPublication>("mavenJava") {
+        from(components["java"])
+        artifactTasks.forEach(::artifact)
+
+        // Infos from Coordinates.kt
+        pom {
+            name.set(Coordinates.NAME)
+            description.set(Coordinates.DESC)
+            url.set("https://github.com/${Coordinates.REPO_ID}")
+
+            licenses {
+                Pom.licenses.forEach {
+                    license {
+                        name.set(it.name)
+                        url.set(it.url)
+                        distribution.set(it.distribution)
+                    }
+                }
+            }
+
+            developers {
+                Pom.developers.forEach {
+                    developer {
+                        id.set(it.id)
+                        name.set(it.name)
+                    }
+                }
+            }
+
+            scm {
+                connection.set("scm:git:git://github.com/${Coordinates.REPO_ID}.git")
+                developerConnection.set("scm:git:ssh://github.com/${Coordinates.REPO_ID}.git")
+                url.set("https://github.com/${Coordinates.REPO_ID}")
+            }
+        }
+
+        // Configure the signing extension to sign this Maven artifact.
+        signing.sign(this)
+    }
+}
 
 nexusPublishing.repositories.sonatype {
     nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
