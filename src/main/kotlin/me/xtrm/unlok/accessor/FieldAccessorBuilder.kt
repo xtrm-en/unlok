@@ -45,25 +45,21 @@ object FieldAccessorBuilder {
         ownerInstance: Any? = null,
     ): FieldAccessor<T> {
         val classfilePath = "$ownerClass.class"
-        var classfile = javaClass.classLoader.getResource("/$classfilePath")
-        if (classfile == null) {
-            // gradle dev env bs
-            classfile = javaClass.classLoader.getResource(classfilePath)
-        }
-        assert(classfile != null) { "Unknown class: $classfilePath" }
+        val classfile = javaClass.classLoader.getResource("/$classfilePath")
+            ?: javaClass.classLoader.getResource(classfilePath)
+            ?: throw IllegalArgumentException("Unknown class: $classfilePath")
 
         val classNode = ClassNode()
-        val stream = classfile!!.openStream()
+        val stream = classfile.openStream()
         ClassReader(stream.readBytes()).accept(classNode, ClassReader.EXPAND_FRAMES)
         stream.close()
 
         val fieldNode = classNode.fields.first { it.name.equals(fieldName) }
-        assert(fieldNode != null) { "Unknown field: $fieldName" }
+            ?: throw IllegalArgumentException("Unknown field: $fieldName")
 
         return fieldAccessor(classNode, fieldNode, ownerInstance)
     }
 
-    @Suppress("UNUSED_VALUE")
     private fun <T> fieldAccessor(
         ownerNode: ClassNode,
         fieldNode: FieldNode,
@@ -83,7 +79,6 @@ object FieldAccessorBuilder {
         fieldNode: FieldNode,
         ownerInstance: Any?,
     ): FieldAccessor<T> {
-        println("Building")
         val ownerClassName = ownerNode.name
         val valueType = Type.getType(fieldNode.desc)
         val fieldType = Type.getType("Ljava/lang/reflect/Field;")
