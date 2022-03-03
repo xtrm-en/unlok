@@ -1,6 +1,7 @@
 package me.xtrm.unlok
 
 import me.xtrm.unlok.delegate.FieldDelegate
+import me.xtrm.unlok.delegate.MethodDelegate
 import me.xtrm.unlok.utils.supportsCurrentVM
 
 /**
@@ -35,13 +36,14 @@ object Unlok {
     fun <T> method(
         ownerClass: String,
         methodName: String = "",
+        methodDesc: String = "",
         ownerInstance: Any? = null,
-    ): FieldDelegate<T> {
+    ): MethodDelegate<T> {
         var className = ownerClass.replace('.', '/')
         if (className.startsWith('L') && className.endsWith(";")) {
             className = className.substring(1, className.length - 1)
         }
 
-        return MethodDelegate<T>(className, methodName, ownerInstance)
+        return MethodDelegate(className, methodName, methodDesc, ownerInstance)
     }
 }
