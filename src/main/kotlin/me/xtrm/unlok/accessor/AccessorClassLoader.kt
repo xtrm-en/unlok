@@ -8,7 +8,7 @@ import org.objectweb.asm.tree.ClassNode
  * @author xtrm-en
  * @since 0.0.1
  */
-object AccessorClassLoader : ClassLoader(Unlok::class.java.classLoader) {
+internal object AccessorClassLoader : ClassLoader(Unlok::class.java.classLoader) {
 
     /**
      * Loads a class by the class name and the bytecode.

@@ -1,6 +1,6 @@
 package me.xtrm.unlok.delegate
 
-import me.xtrm.unlok.accessor.FieldAccessorBuilder
+import me.xtrm.unlok.accessor.AccessorBuilder
 import me.xtrm.unlok.api.accessor.FieldAccessor
 import kotlin.reflect.KProperty
 
@@ -17,23 +17,23 @@ class FieldDelegate<T>(
 
     init {
         if (fieldName.isNotBlank()) {
-            this.accessor = FieldAccessorBuilder.fieldAccessor(ownerClass, fieldName, owner)
+            this.accessor = AccessorBuilder.fieldAccessor(ownerClass, fieldName, owner)
         }
     }
 
     operator fun getValue(t: T?, property: KProperty<*>): T? {
         if (accessor == null) {
             val name = fieldName.ifBlank { property.name }
-            this.accessor = FieldAccessorBuilder.fieldAccessor(ownerClass, name, owner)
+            this.accessor = AccessorBuilder.fieldAccessor(ownerClass, name, owner)
         }
-        return accessor!!.get()
+        return accessor?.get()
     }
 
     operator fun setValue(t: T?, property: KProperty<*>, value: T?) {
         if (accessor == null) {
             val name = fieldName.ifBlank { property.name }
-            this.accessor = FieldAccessorBuilder.fieldAccessor(ownerClass, name, owner)
+            this.accessor = AccessorBuilder.fieldAccessor(ownerClass, name, owner)
         }
-        accessor!!.set(value)
+        accessor?.set(value)
     }
 }
