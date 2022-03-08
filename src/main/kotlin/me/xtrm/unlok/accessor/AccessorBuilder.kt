@@ -307,9 +307,7 @@ object AccessorBuilder {
                 }
 
                 // load arguments on stack from array
-                var index = 0
-                @Suppress("UseWithIndex")
-                for (arg in argumentTypes) {
+                for ((index, arg) in argumentTypes.withIndex()) {
                     val shouldUnbox = ensureBoxed(arg) != arg
 
                     // load array
@@ -323,7 +321,6 @@ object AccessorBuilder {
                     if(shouldUnbox) {
                         instructions.add(unboxInstructions(arg))
                     }
-                    index++
                 }
 
                 // call
