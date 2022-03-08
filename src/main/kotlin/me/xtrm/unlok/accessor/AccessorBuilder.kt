@@ -42,8 +42,11 @@ object AccessorBuilder {
     init {
         val basePackage = (magicAccessorClass?.`package`?.name?.replace('.', '/') ?: "sun/reflect") + '/'
         unlokSuperclass =
-            assembleClass(public, basePackage + "UnlokAccessor", superName = basePackage + "MagicAccessorImpl") {}.also(
-                AccessorClassLoader::load)
+            assembleClass(
+                public,
+                basePackage + "UnlokAccessor",
+                superName = basePackage + "MagicAccessorImpl"
+            ) {}.also(AccessorClassLoader::load)
     }
 
     fun <T> fieldAccessor(
@@ -76,8 +79,8 @@ object AccessorBuilder {
         }.toList()
         if (targets.size > 1) {
             throw IllegalArgumentException(
-                "Cannot find method: $methodName, multiple definitions:\n"
-                    + targets.joinToString("\n") { classNode.name + '.' + it.name + it.desc }
+                "Cannot find method: $methodName, multiple definitions:\n" +
+                    targets.joinToString("\n") { classNode.name + '.' + it.name + it.desc }
             )
         }
         val methodNode = targets[0] ?: throw IllegalArgumentException("Unknown method: $methodName$methodDesc")
@@ -90,7 +93,7 @@ object AccessorBuilder {
             val classfilePath = "$ownerClass.class"
             val classfile =
                 javaClass.classLoader.getResource("/$classfilePath") ?: javaClass.classLoader.getResource(classfilePath)
-                ?: throw IllegalArgumentException("Unknown class: $classfilePath")
+                    ?: throw IllegalArgumentException("Unknown class: $classfilePath")
 
             val classNode = ClassNode()
             val stream = classfile.openStream()
@@ -143,7 +146,8 @@ object AccessorBuilder {
 
         val index = accessorIndex.getAndIncrement()
         val accessorClassName = UNLOK_BASE_PACKAGE + "/accessor\$$index\$${fieldNode.name}"
-        return assembleClass(public,
+        return assembleClass(
+            public,
             accessorClassName,
             superName = unlokSuperclass.name,
             interfaces = listOf(FieldAccessor::class.java)
@@ -191,11 +195,13 @@ object AccessorBuilder {
                     aload_0
                     ldc(Type.getType("L$ownerClassName;"))
                     ldc(fieldNode.name)
-                    invokestatic(accessorUtilsClassName,
+                    invokestatic(
+                        accessorUtilsClassName,
                         "setupFinalField",
                         FIELD_TYPE,
                         "java/lang/Class",
-                        "java/lang/String")
+                        "java/lang/String"
+                    )
                     putfield(accessorClassName, "finalField", FIELD_TYPE)
 
                     +L["call"]
@@ -215,12 +221,14 @@ object AccessorBuilder {
                         instructions.add(unboxInstructions(valueType))
                     }
 
-                    invokestatic(accessorUtilsClassName,
+                    invokestatic(
+                        accessorUtilsClassName,
                         "setFinalField",
                         Type.VOID_TYPE,
                         FIELD_TYPE,
                         OBJECT_TYPE,
-                        OBJECT_TYPE)
+                        OBJECT_TYPE
+                    )
                 } else {
                     if (isStatic) {
                         aload_1
@@ -285,7 +293,8 @@ object AccessorBuilder {
         val isStatic = (methodNode.access and Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC
 
         val accessorClassName = "unlok/accessor\$${accessorIndex.getAndIncrement()}\$${methodNode.name}"
-        return assembleClass(public,
+        return assembleClass(
+            public,
             accessorClassName,
             superName = unlokSuperclass.name,
             interfaces = listOf(MethodAccessor::class.java)
