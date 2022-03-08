@@ -28,10 +28,13 @@ dependencies {
 
 # how does it work
 
+**Note**: you can see more examples in our [tests][tests] source set.
+
 ### accessing a field
 ```kotlin
 class DeclaringClass {
     companion object {
+        @JvmStatic
         private const val privatedName: String = "John"
     }
     private var index: Int = 9
@@ -43,9 +46,30 @@ fun access() {
     println(privatedName)
     
     val instance = DeclaringClass()
-    var index by field<Int>(DeclaringClass::class, instance)
+    var index by field<Int>(DeclaringClass::class, ownerInstance = instance)
     index = 10
     println(index)
+}
+```
+
+### accessing a method
+```kotlin
+class DeclaringClass {
+    companion object {
+        @JvmStatic
+        private fun getState() = "sleeping"
+    }
+    private fun isGaming(wearingSocks: Boolean) = !wearingSocks
+}
+
+fun access() {
+    // name infered from delegation
+    val getState by method<String>(DeclaringClass.Companion::class)
+    println(getState())
+    
+    val instance = DeclaringClass()
+    val isGaming by method<Boolean>(DeclaringClass::class, ownerInstance = instance)
+    println(isGaming(true))
 }
 ```
 
@@ -84,6 +108,8 @@ this project is under the [ISC license][project-license].
 [new-pr]: https://github.com/xtrm-en/unlok/pulls/new "create a new pull request"
 
 [new-issue]: https://github.com/xtrm-en/unlok/issues/new "create a new issue"
+
+[tests]: https://github.com/xtrm-en/unlok/tree/trunk/src/test/kotlin "test source set"
 
 [project-mvnc]: https://maven-badges.herokuapp.com/maven-central/fr.stardustenterprises/unlok "maven central repository"
 
