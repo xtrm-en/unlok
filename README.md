@@ -2,7 +2,7 @@
 [![Build][badge-github-ci]][project-gradle-ci]
 [![Maven Central][badge-mvnc]][project-mvnc]
 
-template for all our [Kotlin][kotlin] projects.
+a property/method accessor library for [Kotlin][kotlin], written in [Kotlin][kotlin].
 
 # how to use
 
@@ -24,6 +24,29 @@ dependencies {
     <artifactId>unlok</artifactId>
     <version>{VERSION}</version>
 </dependency>
+```
+
+# how does it work
+
+### accessing a field
+```kotlin
+class DeclaringClass {
+    companion object {
+        private const val privatedName: String = "John"
+    }
+    private var index: Int = 9
+}
+
+fun access() {
+    // name infered from delegation
+    val privatedName by field<String>(DeclaringClass.Companion::class)
+    println(privatedName)
+    
+    val instance = DeclaringClass()
+    var index by field<Int>(DeclaringClass::class, instance)
+    index = 10
+    println(index)
+}
 ```
 
 # troubleshooting

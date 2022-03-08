@@ -12,5 +12,5 @@ interface MethodAccessor<T> {
      * @param arguments the method args
      * @return the method's return value
      */
-    fun invoke(vararg arguments: Any?): T?
+    fun invoke(arguments: Array<out Any?>): T?
 }

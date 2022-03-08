@@ -22,7 +22,7 @@ class MethodDelegate<T> (
      * @return the method's return value
      */
     operator fun invoke(vararg arguments: Any?): T? =
-        accessor?.invoke(*arguments)
+        accessor?.invoke(arguments)
 
     operator fun getValue(t: Any?, property: KProperty<*>): MethodDelegate<T> {
         if (accessor == null) {
