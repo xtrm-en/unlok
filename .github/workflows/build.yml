@@ -27,16 +27,16 @@ jobs:
           chmod +x gradlew
           ./gradlew build
 
-#            - name: Extract branch name
-#              id: extract_branch
-#              if: github.event_name == 'push'
-#              run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-#
-#            - name: Deploy documentation
-#              if: github.event_name == 'push'
-#              uses: peaceiris/actions-gh-pages@v3
-#              with:
-#                  github_token: ${{ secrets.GITHUB_TOKEN }}
-#                  publish_dir: ./build/dokka/html
-#                  publish_branch: docs-${{ steps.extract_branch.outputs.branch }}
-#                  force_orphan: true
+      - name: Extract branch name
+        id: extract_branch
+        if: github.event_name == 'push'
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+
+      - name: Deploy documentation
+        if: github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/dokka/html
+          publish_branch: docs-${{ steps.extract_branch.outputs.branch }}
+          force_orphan: true
