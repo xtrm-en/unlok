@@ -11,7 +11,7 @@ import java.nio.file.Files
  */
 internal object AccessorClassLoader : ClassLoader(Unlok::class.java.classLoader) {
 
-    private val debugDump = true
+    private val debugDump = java.lang.Boolean.getBoolean("unlok.debug.dump")
 
     /**
      * Loads a class by the class name and the bytecode.

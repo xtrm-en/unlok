@@ -276,8 +276,6 @@ object AccessorBuilder {
         methodNode: MethodNode,
         ownerInstance: Any?,
     ): MethodAccessor<T> {
-        println("> Method accessor ${ownerNode.name}.${methodNode.name}${methodNode.desc}")
-
         val ownerClassName = ownerNode.name
         val argumentTypes = Type.getArgumentTypes(methodNode.desc)
         val returnType = Type.getReturnType(methodNode.desc)
@@ -318,7 +316,7 @@ object AccessorBuilder {
                     // cast to boxed
                     checkcast(ensureBoxed(arg))
                     // unbox if necessary
-                    if(shouldUnbox) {
+                    if (shouldUnbox) {
                         instructions.add(unboxInstructions(arg))
                     }
                 }
