@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package me.xtrm.unlok
 
 import me.xtrm.unlok.dsl.field
