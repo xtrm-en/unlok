@@ -12,7 +12,8 @@ object Pom {
         License("ISC License", "https://opensource.org/licenses/ISC")
     )
     val developers = arrayOf(
-        Developer("xtrm")
+        Developer("xtrm"),
+        Developer("lambdagg")
     )
 }
 
