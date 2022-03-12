@@ -5,9 +5,8 @@ private var initialized = false
 var magicAccessorClass: Class<*>? = null
     private set
 
-fun supportsCurrentVM(): Boolean {
-    return init() != null
-}
+fun supportsCurrentVM(): Boolean =
+    init() != null
 
 private fun init(): Class<*>? {
     if (!initialized) {

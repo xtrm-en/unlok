@@ -2,13 +2,14 @@ package me.xtrm.unlok.accessor
 
 import me.xtrm.unlok.api.accessor.FieldAccessor
 import me.xtrm.unlok.api.accessor.MethodAccessor
+import org.objectweb.asm.tree.ClassNode
 import java.util.WeakHashMap
 
 /**
  * Caches fields and methods using corresponding hash values.
  * @see [AccessorBuilder]
  *
- * @author xtrm-en
+ * @author xtrm
  * @since 0.0.1
  */
 data class AccessorCache(
@@ -22,5 +23,8 @@ data class AccessorCache(
         WeakHashMap(),
 
     val methodStaticCache: MutableMap<Int, MethodAccessor<*>> =
+        WeakHashMap(),
+
+    val classCache: MutableMap<String, ClassNode> =
         WeakHashMap(),
 )

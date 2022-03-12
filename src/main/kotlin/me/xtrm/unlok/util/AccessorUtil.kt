@@ -4,7 +4,7 @@ import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
 /**
- * @author xtrm-en
+ * @author xtrm
  * @since 0.0.1
  */
 // because we use it with reflections (see [AccessorBuilder]):

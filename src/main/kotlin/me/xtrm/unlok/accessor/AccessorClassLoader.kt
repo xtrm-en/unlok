@@ -8,11 +8,15 @@ import java.nio.file.Files
 /**
  * A [ClassLoader] corresponding to Unlok accessors.
  *
- * @author xtrm-en
+ * @author xtrm
  * @since 0.0.1
  */
 internal object AccessorClassLoader : ClassLoader(Unlok::class.java.classLoader) {
     private val doDebugDump = java.lang.Boolean.getBoolean("unlok.debug.dump")
+
+    private val dumpPath by lazy {
+        Files.createTempDirectory(AccessorBuilder.UNLOK_BASE_PACKAGE)
+    }
 
     /**
      * Loads a class by the class name and the bytecode.
@@ -32,9 +36,7 @@ internal object AccessorClassLoader : ClassLoader(Unlok::class.java.classLoader)
         val bytecode = ClassWriter(cwFlags).also(classNode::accept).toByteArray()
 
         if (doDebugDump) {
-            val classTarget = Files.createTempDirectory(
-                AccessorBuilder.UNLOK_BASE_PACKAGE
-            ).resolve("$className.class")
+            val classTarget = dumpPath.resolve("$className.class")
             classTarget.parent.toFile().mkdirs()
 
             Files.write(classTarget, bytecode)

@@ -7,7 +7,7 @@ import me.xtrm.unlok.util.supportsCurrentVM
 /**
  * Unlocking the JVM.
  *
- * @author xtrm-en
+ * @author xtrm, lambdagg
  * @since 0.0.1
  */
 object Unlok {
@@ -32,7 +32,11 @@ object Unlok {
         fieldName: String = "",
         ownerInstance: Any? = null,
     ): FieldDelegate<T> =
-        FieldDelegate(cleanClassName(ownerClassName), fieldName, ownerInstance)
+        FieldDelegate(
+            cleanClassName(ownerClassName),
+            fieldName,
+            ownerInstance
+        )
 
     /**
      * creates a [MethodDelegate] with the given arguments
