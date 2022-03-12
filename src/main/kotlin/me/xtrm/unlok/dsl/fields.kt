@@ -11,16 +11,14 @@ fun <T> field(
 ): FieldDelegate<T> =
     Unlok.field(owner, fieldName, ownerInstance)
 
-fun <T> field(
-    owner: Class<*>,
+fun <T> Class<*>.field(
     fieldName: String = "",
     ownerInstance: Any? = null,
 ): FieldDelegate<T> =
-    field(owner.name, fieldName, ownerInstance)
+    field(this.name, fieldName, ownerInstance)
 
-fun <T> field(
-    owner: KClass<*>,
+fun <T> KClass<*>.field(
     fieldName: String = "",
     ownerInstance: Any? = null,
 ): FieldDelegate<T> =
-    field(owner.java.name, fieldName, ownerInstance)
+    this.java.field(fieldName, ownerInstance)

@@ -16,24 +16,31 @@ class FieldDelegate<T>(
     private var accessor: FieldAccessor<T>? = null
 
     init {
-        if (fieldName.isNotBlank()) {
-            this.accessor = AccessorBuilder.fieldAccessor(ownerClass, fieldName, owner)
+        if (this.fieldName.isNotBlank()) {
+            this.accessor = AccessorBuilder.fieldAccessor(
+                this.ownerClass,
+                this.fieldName,
+                this.owner
+            )
         }
     }
 
-    operator fun getValue(t: T?, property: KProperty<*>): T? {
-        if (accessor == null) {
-            val name = fieldName.ifBlank { property.name }
-            this.accessor = AccessorBuilder.fieldAccessor(ownerClass, name, owner)
-        }
-        return accessor?.get()
-    }
+    operator fun getValue(t: T?, property: KProperty<*>): T? =
+        this.ensureAccessor(property).get()
 
-    operator fun setValue(t: T?, property: KProperty<*>, value: T?) {
-        if (accessor == null) {
-            val name = fieldName.ifBlank { property.name }
-            this.accessor = AccessorBuilder.fieldAccessor(ownerClass, name, owner)
+    operator fun setValue(t: T?, property: KProperty<*>, value: T?): Unit =
+        this.ensureAccessor(property).set(value)
+
+    private fun ensureAccessor(property: KProperty<*>): FieldAccessor<T> =
+        this.run {
+            if (this.accessor == null) {
+                this.accessor = AccessorBuilder.fieldAccessor(
+                    this.ownerClass,
+                    this.fieldName.ifBlank { property.name },
+                    this.owner
+                )
+            }
+
+            this.accessor!!
         }
-        accessor?.set(value)
-    }
 }

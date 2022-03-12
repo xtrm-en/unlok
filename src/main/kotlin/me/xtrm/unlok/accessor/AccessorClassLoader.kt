@@ -6,34 +6,45 @@ import org.objectweb.asm.tree.ClassNode
 import java.nio.file.Files
 
 /**
+ * A [ClassLoader] corresponding to Unlok accessors.
+ *
  * @author xtrm-en
  * @since 0.0.1
  */
 internal object AccessorClassLoader : ClassLoader(Unlok::class.java.classLoader) {
-
-    private val debugDump = java.lang.Boolean.getBoolean("unlok.debug.dump")
+    private val doDebugDump = java.lang.Boolean.getBoolean("unlok.debug.dump")
 
     /**
      * Loads a class by the class name and the bytecode.
      *
      * @param classNode The class node
      * @param cwFlags The [ClassWriter] flags
-     * @return The class.
+     *
+     * @return The defined class.
      *
      * @see [ClassLoader.defineClass]
      */
-    fun load(classNode: ClassNode, cwFlags: Int = ClassWriter.COMPUTE_FRAMES): Class<*> {
+    fun load(
+        classNode: ClassNode,
+        cwFlags: Int = ClassWriter.COMPUTE_FRAMES
+    ): Class<*> {
         val className = classNode.name
         val bytecode = ClassWriter(cwFlags).also(classNode::accept).toByteArray()
 
-        if (debugDump) {
-            val folder = Files.createTempDirectory("unlok")
-            val classTarget = folder.resolve("$className.class")
+        if (doDebugDump) {
+            val classTarget = Files.createTempDirectory(
+                AccessorBuilder.UNLOK_BASE_PACKAGE
+            ).resolve("$className.class")
             classTarget.parent.toFile().mkdirs()
 
             Files.write(classTarget, bytecode)
         }
 
-        return this.defineClass(className.replace('/', '.'), bytecode, 0, bytecode.size)
+        return this.defineClass(
+            className.replace('/', '.'),
+            bytecode,
+            0,
+            bytecode.size
+        )
     }
 }
