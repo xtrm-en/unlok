@@ -2,6 +2,7 @@ package me.xtrm.unlok.accessor
 
 import me.xtrm.unlok.api.accessor.FieldAccessor
 import me.xtrm.unlok.api.accessor.MethodAccessor
+import java.util.WeakHashMap
 
 /**
  * Caches fields and methods using corresponding hash values.
@@ -12,14 +13,14 @@ import me.xtrm.unlok.api.accessor.MethodAccessor
  */
 data class AccessorCache(
     val fieldVirtualCache: MutableMap<Int, FieldAccessor<*>> =
-        mutableMapOf(),
+        WeakHashMap(),
 
     val fieldStaticCache: MutableMap<Int, FieldAccessor<*>> =
-        mutableMapOf(),
+        WeakHashMap(),
 
     val methodVirtualCache: MutableMap<Int, MethodAccessor<*>> =
-        mutableMapOf(),
+        WeakHashMap(),
 
     val methodStaticCache: MutableMap<Int, MethodAccessor<*>> =
-        mutableMapOf(),
+        WeakHashMap(),
 )
