@@ -31,33 +31,15 @@ jobs:
       - name: Build using Gradle
         run: ./gradlew build
 
-      - name: Upload docs
-        if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '1.8' }}  # Only upload docs once
-        uses: actions/upload-artifact@v3
-        with:
-          name: docs
-          path: build/libs/unlok-0.2.2-javadoc.jar
-
-  docs:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    steps:
-      - name: Download the docs artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: docs
-
-      - name: Unzip the docs artifact
-        run: 7z x * -oout
-
       - name: Extract branch name
-        id: extract_branch
+        if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '1.8' }}  # Only deploy docs once
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
 
       - name: Deploy documentation
+        if: ${{ github.event_name == 'push' && runner.os == 'Linux' && matrix.java == '1.8' }}  # Only deploy docs once
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
+          publish_dir: ./build
           publish_branch: docs-${{ steps.extract_branch.outputs.branch }}
           force_orphan: true
