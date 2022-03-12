@@ -6,7 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @Suppress("LocalVariableName")
-internal class FieldAccessorTests {
+class FieldAccessorTests {
     @Test
     fun `can access private static fields`() {
         var staticName by PrivateFieldHolder::class.field<String>()
@@ -44,20 +44,20 @@ internal class FieldAccessorTests {
     }
 }
 
-internal class PrivateFieldHolder(
+class PrivateFieldHolder(
     private var surname: String
 ) {
     companion object {
         @JvmStatic
-        private var NAME = "John"
+        private var staticName = "John"
 
-        fun getName() = NAME
+        fun getName() = staticName
     }
 
     fun getSurname() = surname
 }
 
 @Suppress("unused")
-internal class FinalFieldHolder(
+class FinalFieldHolder(
     private val name: String
 )

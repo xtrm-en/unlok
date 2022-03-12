@@ -61,10 +61,11 @@ object AccessorBuilder {
         fieldName: String = "",
         ownerInstance: Any? = null,
     ): FieldAccessor<T> {
-        val classNode = loadClass(ownerClass)
+        val classNode = loadClass(ownerClass.replace('.', '/'))
 
-        val fieldNode = classNode.fields.first { it.name.equals(fieldName) }
-            ?: throw NoSuchFieldException("Unknown field: $fieldName")
+        val fieldNode = classNode.fields.firstOrNull {
+            it.name.equals(fieldName)
+        } ?: throw NoSuchFieldException("Unknown field: $fieldName")
 
         return fieldAccessor(classNode, fieldNode, ownerInstance)
     }
@@ -75,7 +76,7 @@ object AccessorBuilder {
         methodDesc: String = "",
         ownerInstance: Any? = null,
     ): MethodAccessor<T> {
-        val classNode = loadClass(ownerClass)
+        val classNode = loadClass(ownerClass.replace('.', '/'))
 
         val targets = classNode.methods.filter {
             var correct = it.name.equals(methodName)
@@ -102,8 +103,8 @@ object AccessorBuilder {
         return methodAccessor(classNode, methodNode, ownerInstance)
     }
 
-    private fun loadClass(ownerClass: String): ClassNode {
-        return classCache.computeIfAbsent(ownerClass) {
+    private fun loadClass(ownerClass: String): ClassNode =
+        classCache.computeIfAbsent(ownerClass) {
             val classFile = this.javaClass.classLoader.run {
                 this.getResource("/$ownerClass.class")
                     ?: this.getResource("$ownerClass.class")
@@ -119,7 +120,6 @@ object AccessorBuilder {
 
             classNode
         }
-    }
 
     private fun <T> fieldAccessor(
         ownerNode: ClassNode,

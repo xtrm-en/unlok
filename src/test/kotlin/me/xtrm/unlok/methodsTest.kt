@@ -7,7 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 @Suppress("LocalVariableName")
-internal class MethodAccessorTests {
+class MethodAccessorTests {
     @Test
     fun `can call private static method`() {
         val eq by PrivateMethodHolder::class.method<Boolean>()
@@ -26,14 +26,14 @@ internal class MethodAccessorTests {
     }
 }
 
-internal object PrivateMethodHolder {
+object PrivateMethodHolder {
     @JvmStatic
     private fun eq(first: String, second: String): Boolean {
         return first == second
     }
 }
 
-internal class PrivateVirtualMethodHolder(
+class PrivateVirtualMethodHolder(
     private val returnValue: Boolean
 ) {
     fun method(): Boolean =
