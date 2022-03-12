@@ -10,7 +10,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version Plugins.KTLINT
 }
 
-val jvmTarget = "1.8"
+val jvmTarget = "17"
 val apiSourceSet = true
 
 group = Coordinates.GROUP
