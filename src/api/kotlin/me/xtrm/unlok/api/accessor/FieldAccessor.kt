@@ -8,12 +8,12 @@ package me.xtrm.unlok.api.accessor
  */
 interface FieldAccessor<T> {
     /**
-     * @return The field's value
+     * @return the field's value
      */
     fun get(): T?
 
     /**
-     * @param value The field's value
+     * @param value the new field's value
      */
     fun set(value: T?)
 }
