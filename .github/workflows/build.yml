@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         java: [1.8, 11, 17]  # We're building on all Java LTS versions
     runs-on: ubuntu-latest
