@@ -2,7 +2,7 @@
 [![Build][badge-github-ci]][project-gradle-ci]
 [![Maven Central][badge-mvnc]][project-mvnc]
 
-a property/method accessor library for [Kotlin][kotlin], written in [Kotlin][kotlin].
+a property/method accessor library for the [JVM][jvm], written in [Kotlin][kotlin].
 
 # how to use
 
