@@ -1,16 +1,21 @@
+package me.xtrm.unlok;
+
 import me.xtrm.unlok.delegate.MethodDelegate;
-import me.xtrm.unlok.dsl.MethodsKt;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("all")
-public class JavaMethods {
-
+public class JavaMethodsTest {
     @Test
     public void canCallPrivateTypedMethod() {
         MethodDelegate<Boolean> delegate =
-            MethodsKt.<Boolean>method(InnerClass.class, "typedFunction", "", null);
+            Unlok.<Boolean>method(
+                InnerClass.class.getName(),
+                "typedFunction",
+                "",
+                null
+            );
 
         int arg2 = 1;
         Integer arg1 = Integer.valueOf(1);
@@ -24,7 +29,14 @@ public class JavaMethods {
     }
 
     public static class InnerClass {
-        public static Boolean typedFunction(int arg1, Integer arg2, String arg3, Object arg4, Boolean arg5, boolean arg6) {
+        public static Boolean typedFunction(
+            int arg1,
+            Integer arg2,
+            String arg3,
+            Object arg4,
+            Boolean arg5,
+            boolean arg6
+        ) {
             return Boolean.TRUE.booleanValue();
         }
     }
