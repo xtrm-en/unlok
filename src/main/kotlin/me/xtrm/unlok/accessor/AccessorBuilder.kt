@@ -29,6 +29,9 @@ import java.util.*
  */
 @Suppress("UNCHECKED_CAST")
 object AccessorBuilder {
+    /**
+     * The base package for storing Unlok accessors.
+     */
     internal const val UNLOK_BASE_PACKAGE = "unlok"
 
     /**
@@ -49,16 +52,28 @@ object AccessorBuilder {
      */
     private val FIELD_TYPE = Type.getType("Ljava/lang/reflect/Field;")
 
+    /**
+     * The current [AccessorCache], used to avoid reprocessing.
+     *
+     * @see AccessorCache
+     */
     private val ACCESSOR_CACHE = AccessorCache()
 
+    /**
+     * The superclass node. TODO(@lambdagg) make a clean explanation about that
+     */
+    private val UNLOK_ACCESSOR_SUPERCLASS: ClassNode
+
+    /**
+     * Used to avoid having same-named accessors during runtime.
+     */
     private var accessorIndex = 0
-    private var unlokSuperclass: ClassNode
 
     init {
         val basePackage =
             magicAccessorClass!!.`package`.name.replace('.', '/') + '/'
 
-        unlokSuperclass =
+        UNLOK_ACCESSOR_SUPERCLASS =
             assembleClass(
                 public,
                 basePackage + "UnlokAccessor",
@@ -66,12 +81,23 @@ object AccessorBuilder {
             ) {}.also(AccessorClassLoader::load)
     }
 
+    /**
+     * Provides a [FieldAccessor] corresponding to given arguments.
+     *
+     * @param ownerClassName The name of the class that holds the wanted field.
+     * @param fieldName The name of the wanted field.
+     * @param ownerInstance If the wanted field is static, this parameter *has*
+     *                      to be empty. Otherwise, we need a value to get the
+     *                      field value from.
+     *
+     * @return The newly created [FieldAccessor].
+     */
     fun <T> fieldAccessor(
-        ownerClass: String,
+        ownerClassName: String,
         fieldName: String = "",
         ownerInstance: Any? = null,
     ): FieldAccessor<T> {
-        val classNode = loadClass(ownerClass)
+        val classNode = loadClass(ownerClassName)
 
         val fieldNode = classNode.fields.firstOrNull {
             it.name.equals(fieldName)
@@ -80,13 +106,26 @@ object AccessorBuilder {
         return fieldAccessor(classNode, fieldNode, ownerInstance)
     }
 
+    /**
+     * Provides a [MethodAccessor] corresponding to given arguments.
+     *
+     * @param ownerClassName The name of the class that holds the wanted
+     *                       method.
+     * @param methodName The name of the wanted method.
+     * @param methodDesc The description of the wanted method, if needed.
+     * @param ownerInstance If the wanted field is static, this parameter *has*
+     *                      to be empty. Otherwise, we need a value to get the
+     *                      field value from.
+     *
+     * @return The newly created [MethodAccessor].
+     */
     fun <T> methodAccessor(
-        ownerClass: String,
+        ownerClassName: String,
         methodName: String = "",
         methodDesc: String = "",
         ownerInstance: Any? = null,
     ): MethodAccessor<T> {
-        val classNode = loadClass(ownerClass)
+        val classNode = loadClass(ownerClassName)
 
         val targets = classNode.methods.filter {
             var correct = it.name.equals(methodName)
@@ -113,9 +152,18 @@ object AccessorBuilder {
         return methodAccessor(classNode, methodNode, ownerInstance)
     }
 
-    private fun loadClass(_ownerClass: String): ClassNode =
+    /**
+     * Finds the class following its given name, and loads it into the cache if
+     * not already present.
+     *
+     * @param className The name of the class to load.
+     *
+     * @return A [ClassNode] corresponding to the wanted class, if found.
+     * @throws ClassNotFoundException If the wanted class could not be found.
+     */
+    private fun loadClass(className: String): ClassNode =
         ACCESSOR_CACHE.classCache.computeIfAbsent(
-            _ownerClass.replace('.', '/')
+            className.replace('.', '/')
         ) { clazz ->
             var classFileName = clazz
             var classFile: URL? = null
@@ -138,7 +186,7 @@ object AccessorBuilder {
             }
 
             if (classFile == null) {
-                throw ClassNotFoundException("Unknown class: $_ownerClass")
+                throw ClassNotFoundException("Unknown class: $className")
             }
 
             val classNode = ClassNode()
@@ -152,53 +200,67 @@ object AccessorBuilder {
             classNode
         }
 
+    /**
+     * Internal method in charge of caching while building the accessor
+     * instance. Follows the same rules as its public overload, just with
+     * class and field nodes instead of raw strings.
+     *
+     * @see AccessorBuilder.fieldAccessor
+     * @see AccessorBuilder.buildFieldAccessor
+     */
     private fun <T> fieldAccessor(
         ownerNode: ClassNode,
         fieldNode: FieldNode,
         ownerInstance: Any?,
-    ): FieldAccessor<T> {
-        val hashKey = Objects.hash(
-            ownerNode.name,
-            fieldNode.name,
-            fieldNode.desc,
-            fieldNode.signature
-        )
-
+    ): FieldAccessor<T> =
         // Add the current hash key to the cache if it is not in it yet
-        return ACCESSOR_CACHE.run {
+        ACCESSOR_CACHE.run {
             if (fieldNode.isStatic()) {
                 this.fieldStaticCache
             } else {
                 this.fieldVirtualCache
             }
-        }.computeIfAbsent(hashKey) {
+        }.computeIfAbsent(
+            Objects.hash(
+                ownerNode.name,
+                fieldNode.name,
+                fieldNode.desc,
+                fieldNode.signature
+            )
+        ) {
             buildFieldAccessor<T>(ownerNode, fieldNode, ownerInstance)
         } as FieldAccessor<T>
-    }
 
+    /**
+     * Internal method in charge of caching while building the accessor
+     * instance. Follows the same rules as its public overload, just with
+     * class and method nodes instead of raw strings.
+     *
+     * @see AccessorBuilder.methodAccessor
+     * @see AccessorBuilder.buildMethodAccessor
+     */
     private fun <T> methodAccessor(
         ownerNode: ClassNode,
         methodNode: MethodNode,
         ownerInstance: Any?,
-    ): MethodAccessor<T> {
-        val hashKey = Objects.hash(
-            ownerNode.name,
-            methodNode.name,
-            methodNode.desc,
-            methodNode.signature
-        )
-
+    ): MethodAccessor<T> =
         // Add the current hash key to the cache if it is not in it yet
-        return ACCESSOR_CACHE.run {
+        ACCESSOR_CACHE.run {
             if (methodNode.isStatic()) {
                 this.methodStaticCache
             } else {
                 this.methodVirtualCache
             }
-        }.computeIfAbsent(hashKey) {
+        }.computeIfAbsent(
+            Objects.hash(
+                ownerNode.name,
+                methodNode.name,
+                methodNode.desc,
+                methodNode.signature
+            )
+        ) {
             buildMethodAccessor<T>(ownerNode, methodNode, ownerInstance)
         } as MethodAccessor<T>
-    }
 
     private fun <T> buildFieldAccessor(
         ownerNode: ClassNode,
@@ -206,9 +268,6 @@ object AccessorBuilder {
         ownerInstance: Any?,
     ): FieldAccessor<T> {
         val ownerClassName = ownerNode.name
-
-        println("Building accessor for $ownerClassName")
-        assert(ownerNode.fields.any { it == fieldNode })
 
         val valueType = Type.getType(fieldNode.desc)
         val primitiveBoxing = valueType != ensureBoxed(valueType)
@@ -219,7 +278,7 @@ object AccessorBuilder {
         return assembleClass(
             public,
             accessorClassName,
-            superName = unlokSuperclass.name,
+            superName = UNLOK_ACCESSOR_SUPERCLASS.name,
             interfaces = listOf(FieldAccessor::class.java)
         ) {
             if (!fieldNode.isStatic()) {
@@ -250,7 +309,7 @@ object AccessorBuilder {
                 }
 
                 // make sure primitives are converted to boxed types
-                instructions.add(boxInstructions(valueType))
+                instructions.add(assembleBoxInstructions(valueType))
 
                 areturn
             }
@@ -295,7 +354,7 @@ object AccessorBuilder {
                     }
 
                     if (primitiveBoxing) {
-                        instructions.add(unboxInstructions(valueType))
+                        instructions.add(assembleUnboxInstructions(valueType))
                     }
 
                     invokestatic(
@@ -311,7 +370,7 @@ object AccessorBuilder {
                         aload_1
                         if (primitiveBoxing) {
                             // Integer.valueOf(arg0)
-                            instructions.add(unboxInstructions(valueType))
+                            instructions.add(assembleUnboxInstructions(valueType))
                         }
 
                         // owner.field = arg0
@@ -324,7 +383,7 @@ object AccessorBuilder {
                         aload_1
                         if (primitiveBoxing) {
                             // Integer.valueOf(arg1)
-                            instructions.add(unboxInstructions(valueType))
+                            instructions.add(assembleUnboxInstructions(valueType))
                         }
 
                         // this.instance.field = arg1
@@ -387,7 +446,7 @@ object AccessorBuilder {
         return assembleClass(
             public,
             accessorClassName,
-            superName = unlokSuperclass.name,
+            superName = UNLOK_ACCESSOR_SUPERCLASS.name,
             interfaces = listOf(MethodAccessor::class.java)
         ) {
             if (!methodNode.isStatic()) {
@@ -426,7 +485,7 @@ object AccessorBuilder {
                     checkcast(ensureBoxed(arg))
                     // unbox if necessary
                     if (shouldUnbox) {
-                        instructions.add(unboxInstructions(arg))
+                        instructions.add(assembleUnboxInstructions(arg))
                     }
                 }
 
@@ -438,7 +497,7 @@ object AccessorBuilder {
                 }
 
                 // box return value
-                instructions.add(boxInstructions(returnType))
+                instructions.add(assembleBoxInstructions(returnType))
 
                 areturn
             }
@@ -473,7 +532,10 @@ object AccessorBuilder {
     ): ClassAssembly.() -> Unit = {
         // Constructor
         var params = emptyArray<String>()
-        if (!isStatic) params += ownerClassName
+        if (!isStatic) {
+            params += ownerClassName
+        }
+
         method(public, "<init>", Type.VOID_TYPE, *params) {
             // super()
             aload_0
@@ -490,77 +552,114 @@ object AccessorBuilder {
         }
     }
 
-    // From: https://github.com/cbyrneee/Injector/ @ InjectorClassTransformer.kt
-    private fun boxInstructions(type: Type): InsnList =
+    /**
+     * Generates an instruction block for boxing the given type.
+     * https://github.com/cbyrneee/Injector/blob/649038a/src/main/kotlin/dev/cbyrne/injector/clazz/transformer/impl/InjectorClassTransformer.kt#L348
+     *
+     * @param type The current ASM [Type].
+     *
+     * @return The generated instruction list.
+     *
+     * @author cbyrneee
+     */
+    private fun assembleBoxInstructions(type: Type): InsnList =
         assembleBlock {
             when (type.sort) {
-                Type.INT -> {
+                Type.INT ->
                     invokestatic(java.lang.Integer::class, "valueOf", java.lang.Integer::class, int)
-                }
-                Type.FLOAT -> {
+
+                Type.FLOAT ->
                     invokestatic(java.lang.Float::class, "valueOf", java.lang.Float::class, float)
-                }
-                Type.LONG -> {
+
+                Type.LONG ->
                     invokestatic(java.lang.Long::class, "valueOf", java.lang.Long::class, long)
-                }
-                Type.DOUBLE -> {
+
+                Type.DOUBLE ->
                     invokestatic(java.lang.Double::class, "valueOf", java.lang.Double::class, double)
-                }
-                Type.BOOLEAN -> {
+
+                Type.BOOLEAN ->
                     invokestatic(java.lang.Boolean::class, "valueOf", java.lang.Boolean::class, boolean)
-                }
-                Type.SHORT -> {
+
+                Type.SHORT ->
                     invokestatic(java.lang.Short::class, "valueOf", java.lang.Short::class, short)
-                }
-                Type.BYTE -> {
+
+                Type.BYTE ->
                     invokestatic(java.lang.Byte::class, "valueOf", java.lang.Byte::class, byte)
-                }
-                Type.CHAR -> {
+
+                Type.CHAR ->
                     invokestatic(java.lang.Character::class, "valueOf", java.lang.Character::class, char)
-                }
             }
         }.first
 
-    private fun unboxInstructions(type: Type): InsnList =
+    /**
+     * Generates an instruction block for unboxing the given type.
+     *
+     * @param type The current ASM [Type].
+     *
+     * @return The generated instruction list.
+     */
+    private fun assembleUnboxInstructions(type: Type): InsnList =
         assembleBlock {
             when (type.sort) {
-                Type.INT -> {
+                Type.INT ->
                     invokevirtual(java.lang.Integer::class, "intValue", int)
-                }
-                Type.FLOAT -> {
+
+                Type.FLOAT ->
                     invokevirtual(java.lang.Float::class, "floatValue", float)
-                }
-                Type.LONG -> {
+
+                Type.LONG ->
                     invokevirtual(java.lang.Long::class, "longValue", long)
-                }
-                Type.DOUBLE -> {
+
+                Type.DOUBLE ->
                     invokevirtual(java.lang.Double::class, "doubleValue", double)
-                }
-                Type.BOOLEAN -> {
+
+                Type.BOOLEAN ->
                     invokevirtual(java.lang.Boolean::class, "booleanValue", boolean)
-                }
-                Type.SHORT -> {
+
+                Type.SHORT ->
                     invokevirtual(java.lang.Short::class, "shortValue", short)
-                }
-                Type.BYTE -> {
+
+                Type.BYTE ->
                     invokevirtual(java.lang.Byte::class, "byteValue", byte)
-                }
-                Type.CHAR -> {
+
+                Type.CHAR ->
                     invokevirtual(java.lang.Character::class, "charValue", char)
-                }
             }
         }.first
 
+    /**
+     * Ensures the given type is boxed.
+     *
+     * @param type The unboxed ASM [Type]
+     *
+     * @return The boxed version of the given type, as an ASM [Type].
+     */
     private fun ensureBoxed(type: Type): Type =
         when (type.sort) {
-            Type.INT -> Type.getType(java.lang.Integer::class.java)
-            Type.FLOAT -> Type.getType(java.lang.Float::class.java)
-            Type.LONG -> Type.getType(java.lang.Long::class.java)
-            Type.DOUBLE -> Type.getType(java.lang.Double::class.java)
-            Type.BOOLEAN -> Type.getType(java.lang.Boolean::class.java)
-            Type.SHORT -> Type.getType(java.lang.Short::class.java)
-            Type.BYTE -> Type.getType(java.lang.Byte::class.java)
-            Type.CHAR -> Type.getType(java.lang.Character::class.java)
+            Type.INT ->
+                Type.getType(java.lang.Integer::class.java)
+
+            Type.FLOAT ->
+                Type.getType(java.lang.Float::class.java)
+
+            Type.LONG ->
+                Type.getType(java.lang.Long::class.java)
+
+            Type.DOUBLE ->
+                Type.getType(java.lang.Double::class.java)
+
+            Type.BOOLEAN ->
+                Type.getType(java.lang.Boolean::class.java)
+
+            Type.SHORT ->
+                Type.getType(java.lang.Short::class.java)
+
+            Type.BYTE ->
+                Type.getType(java.lang.Byte::class.java)
+
+            Type.CHAR ->
+                Type.getType(java.lang.Character::class.java)
+
             else -> type
         }
 }

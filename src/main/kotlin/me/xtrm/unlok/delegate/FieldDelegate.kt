@@ -9,18 +9,18 @@ import kotlin.reflect.KProperty
  * @since 0.0.1
  */
 class FieldDelegate<T>(
-    private val ownerClass: String,
+    private val ownerClassName: String,
     private val fieldName: String = "",
-    private val owner: Any? = null,
+    private val ownerInstance: Any? = null,
 ) {
     private var accessor: FieldAccessor<T>? = null
 
     init {
         if (this.fieldName.isNotBlank()) {
             this.accessor = AccessorBuilder.fieldAccessor(
-                this.ownerClass,
+                this.ownerClassName,
                 this.fieldName,
-                this.owner
+                this.ownerInstance
             )
         }
     }
@@ -35,9 +35,9 @@ class FieldDelegate<T>(
         this.run {
             if (this.accessor == null) {
                 this.accessor = AccessorBuilder.fieldAccessor(
-                    this.ownerClass,
+                    this.ownerClassName,
                     this.fieldName.ifBlank { property.name },
-                    this.owner
+                    this.ownerInstance
                 )
             }
 
