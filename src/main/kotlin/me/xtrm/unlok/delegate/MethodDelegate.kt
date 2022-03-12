@@ -5,7 +5,7 @@ import me.xtrm.unlok.api.accessor.MethodAccessor
 import kotlin.reflect.KProperty
 
 /**
- * @author xtrm-en
+ * @author xtrm
  * @since 0.0.1
  */
 class MethodDelegate<T> (

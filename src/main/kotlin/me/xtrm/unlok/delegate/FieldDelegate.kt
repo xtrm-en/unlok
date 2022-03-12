@@ -5,7 +5,7 @@ import me.xtrm.unlok.api.accessor.FieldAccessor
 import kotlin.reflect.KProperty
 
 /**
- * @author xtrm-en
+ * @author xtrm
  * @since 0.0.1
  */
 class FieldDelegate<T>(

@@ -18,35 +18,45 @@ import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.MethodNode
+import java.net.URL
 import java.util.*
 
 /**
  * Uses some JVM magic to access private members.
  *
- * @author xtrm-en
+ * @author xtrm
  * @since 0.0.1
  */
 @Suppress("UNCHECKED_CAST")
 object AccessorBuilder {
     internal const val UNLOK_BASE_PACKAGE = "unlok"
 
+    /**
+     * The canonical name of the [AccessorUtil] class. The reason why we are
+     * not using [Class.getCanonicalName] is that some JDK have 'broken'
+     * implementations of this method, better do it yo'self!
+     */
     private val ACCESSOR_UTIL_CANONICAL_CLASS_NAME =
         AccessorUtil::class.java.name.replace('.', '/')
 
+    /**
+     * An ASM [Type] corresponding to the [Object] type.
+     */
     private val OBJECT_TYPE = Type.getType("Ljava/lang/Object;")
+
+    /**
+     * An ASM [Type] corresponding to the [java.lang.reflect.Field] type.
+     */
     private val FIELD_TYPE = Type.getType("Ljava/lang/reflect/Field;")
 
-    private val classCache = mutableMapOf<String, ClassNode>()
-    private val accessorCache = AccessorCache()
+    private val ACCESSOR_CACHE = AccessorCache()
 
     private var accessorIndex = 0
     private var unlokSuperclass: ClassNode
 
     init {
-        val basePackage = (
-            magicAccessorClass?.`package`?.name?.replace('.', '/')
-                ?: "sun/reflect"
-            ) + '/'
+        val basePackage =
+            magicAccessorClass!!.`package`.name.replace('.', '/') + '/'
 
         unlokSuperclass =
             assembleClass(
@@ -61,7 +71,7 @@ object AccessorBuilder {
         fieldName: String = "",
         ownerInstance: Any? = null,
     ): FieldAccessor<T> {
-        val classNode = loadClass(ownerClass.replace('.', '/'))
+        val classNode = loadClass(ownerClass)
 
         val fieldNode = classNode.fields.firstOrNull {
             it.name.equals(fieldName)
@@ -76,7 +86,7 @@ object AccessorBuilder {
         methodDesc: String = "",
         ownerInstance: Any? = null,
     ): MethodAccessor<T> {
-        val classNode = loadClass(ownerClass.replace('.', '/'))
+        val classNode = loadClass(ownerClass)
 
         val targets = classNode.methods.filter {
             var correct = it.name.equals(methodName)
@@ -103,12 +113,33 @@ object AccessorBuilder {
         return methodAccessor(classNode, methodNode, ownerInstance)
     }
 
-    private fun loadClass(ownerClass: String): ClassNode =
-        classCache.computeIfAbsent(ownerClass) {
-            val classFile = this.javaClass.classLoader.run {
-                this.getResource("/$ownerClass.class")
-                    ?: this.getResource("$ownerClass.class")
-            } ?: throw ClassNotFoundException("Unknown class: $ownerClass")
+    private fun loadClass(_ownerClass: String): ClassNode =
+        ACCESSOR_CACHE.classCache.computeIfAbsent(
+            _ownerClass.replace('.', '/')
+        ) { clazz ->
+            var classFileName = clazz
+            var classFile: URL? = null
+            while (classFile == null) {
+                classFile = this.javaClass.classLoader.run {
+                    this.getResource("/$classFileName.class")
+                        ?: this.getResource("$classFileName.class")
+                }
+
+                if (classFile == null) {
+                    if (classFileName.indexOf('/') == -1) {
+                        break
+                    }
+
+                    // Replace last '/' with a '$', kinda hacky... 'kinda'
+                    classFileName = classFileName.reversed()
+                        .replaceFirst('/', '$')
+                        .reversed()
+                }
+            }
+
+            if (classFile == null) {
+                throw ClassNotFoundException("Unknown class: $_ownerClass")
+            }
 
             val classNode = ClassNode()
             val stream = classFile.openStream()
@@ -134,7 +165,7 @@ object AccessorBuilder {
         )
 
         // Add the current hash key to the cache if it is not in it yet
-        return accessorCache.run {
+        return ACCESSOR_CACHE.run {
             if (fieldNode.isStatic()) {
                 this.fieldStaticCache
             } else {
@@ -158,7 +189,7 @@ object AccessorBuilder {
         )
 
         // Add the current hash key to the cache if it is not in it yet
-        return accessorCache.run {
+        return ACCESSOR_CACHE.run {
             if (methodNode.isStatic()) {
                 this.methodStaticCache
             } else {
@@ -175,6 +206,10 @@ object AccessorBuilder {
         ownerInstance: Any?,
     ): FieldAccessor<T> {
         val ownerClassName = ownerNode.name
+
+        println("Building accessor for $ownerClassName")
+        assert(ownerNode.fields.any { it == fieldNode })
+
         val valueType = Type.getType(fieldNode.desc)
         val primitiveBoxing = valueType != ensureBoxed(valueType)
 
@@ -203,7 +238,7 @@ object AccessorBuilder {
             )()
 
             // Getter
-            val getter = method(public, "get", valueType) {
+            val getter = method(public, "get", ensureBoxed(valueType)) {
                 if (fieldNode.isStatic()) {
                     // owner.field
                     getstatic(ownerClassName, fieldNode)
@@ -300,7 +335,7 @@ object AccessorBuilder {
                 _return
             }
 
-            if (!valueType.internalName.equals("java/lang/Object")) {
+            if (valueType != OBJECT_TYPE) {
                 // bridge getter
                 method(
                     public + synthetic + bridge,
@@ -435,25 +470,23 @@ object AccessorBuilder {
         ownerClassName: String,
         accessorClassName: String,
         isStatic: Boolean,
-    ): ClassAssembly.() -> Unit {
-        return {
-            // Constructor
-            var params = emptyArray<String>()
-            if (!isStatic) params += ownerClassName
-            method(public, "<init>", Type.VOID_TYPE, *params) {
-                // super()
+    ): ClassAssembly.() -> Unit = {
+        // Constructor
+        var params = emptyArray<String>()
+        if (!isStatic) params += ownerClassName
+        method(public, "<init>", Type.VOID_TYPE, *params) {
+            // super()
+            aload_0
+            invokespecial(OBJECT_TYPE, "<init>", "()V")
+
+            if (!isStatic) {
+                // this.instance = instance
                 aload_0
-                invokespecial(OBJECT_TYPE, "<init>", "()V")
-
-                if (!isStatic) {
-                    // this.instance = instance
-                    aload_0
-                    aload_1
-                    putfield(accessorClassName, "instance", ownerClassName)
-                }
-
-                _return
+                aload_1
+                putfield(accessorClassName, "instance", ownerClassName)
             }
+
+            _return
         }
     }
 
