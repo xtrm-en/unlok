@@ -35,18 +35,20 @@ dependencies {
 class DeclaringClass {
     companion object {
         @JvmStatic
-        private const val privatedName: String = "John"
+        private val privatedName: String = "John"
     }
-    private var index: Int = 9
+    private val index: Int = 9
 }
 
 fun access() {
     // name infered from delegation
-    val privatedName by field<String>(DeclaringClass.Companion::class)
+    val privatedName by DeclaringClass::class.field<String>()
     println(privatedName)
     
     val instance = DeclaringClass()
-    var index by field<Int>(DeclaringClass::class, ownerInstance = instance)
+    
+    // use `var` to modify the variable, even if it is final
+    var index by DeclaringClass::class.field<Int>(ownerInstance = instance)
     index = 10
     println(index)
 }
@@ -64,11 +66,11 @@ class DeclaringClass {
 
 fun access() {
     // name infered from delegation
-    val getState by method<String>(DeclaringClass.Companion::class)
+    val getState by DeclaringClass::class.method<String>()
     println(getState())
     
     val instance = DeclaringClass()
-    val isGaming by method<Boolean>(DeclaringClass::class, ownerInstance = instance)
+    val isGaming by DeclaringClass::class.method<Boolean>(ownerInstance = instance)
     println(isGaming(true))
 }
 ```
