@@ -3,7 +3,7 @@ package me.xtrm.unlok.api.accessor
 /**
  * Interface proxy that grants access to a field.
  *
- * @author xtrm-en
+ * @author xtrm
  * @since 0.0.1
  */
 interface FieldAccessor<T> {

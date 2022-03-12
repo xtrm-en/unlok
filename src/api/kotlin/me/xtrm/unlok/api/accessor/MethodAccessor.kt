@@ -3,7 +3,7 @@ package me.xtrm.unlok.api.accessor
 /**
  * Interface proxy that grants access to a method.
  *
- * @author xtrm-en
+ * @author xtrm
  * @since 0.2.0
  */
 interface MethodAccessor<T> {
