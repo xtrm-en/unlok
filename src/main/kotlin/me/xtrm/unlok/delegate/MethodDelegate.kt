@@ -9,20 +9,20 @@ import kotlin.reflect.KProperty
  * @since 0.0.1
  */
 class MethodDelegate<T> (
-    private val ownerClass: String,
+    private val ownerClassName: String,
     private val methodName: String = "",
     private val methodDesc: String = "",
-    private val owner: Any? = null,
+    private val ownerInstance: Any? = null,
 ) {
     private var accessor: MethodAccessor<T>? = null
 
     init {
         if (this.methodName.isNotBlank()) {
             this.accessor = AccessorBuilder.methodAccessor(
-                this.ownerClass,
+                this.ownerClassName,
                 this.methodName,
                 this.methodDesc,
-                this.owner
+                this.ownerInstance
             )
         }
     }
@@ -42,10 +42,10 @@ class MethodDelegate<T> (
         this.apply {
             if (this.accessor == null) {
                 this.accessor = AccessorBuilder.methodAccessor(
-                    this.ownerClass,
+                    this.ownerClassName,
                     this.methodName.ifBlank { property.name },
                     this.methodDesc,
-                    this.owner
+                    this.ownerInstance
                 )
             }
         }
