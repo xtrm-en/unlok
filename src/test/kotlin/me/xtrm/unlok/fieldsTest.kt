@@ -1,3 +1,5 @@
+@file:Suppress("LocalVariableName")
+
 package me.xtrm.unlok
 
 import me.xtrm.unlok.dsl.field
@@ -5,7 +7,6 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress("LocalVariableName")
 class FieldAccessorTests {
     @Test
     fun `can access private static fields`() {

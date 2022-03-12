@@ -6,7 +6,6 @@ import me.xtrm.unlok.dsl.method
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-@Suppress("LocalVariableName")
 class MethodAccessorTests {
     @Test
     fun `can call private static method`() {
