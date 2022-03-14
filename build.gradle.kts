@@ -18,6 +18,7 @@ version = Coordinates.VERSION
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
     maven("https://maven.hackery.site")
 }
 
@@ -25,6 +26,8 @@ dependencies {
     Dependencies.kotlinModules.forEach {
         implementation("org.jetbrains.kotlin", "kotlin-$it", Dependencies.KOTLIN)
     }
+
+    implementation("com.github.xtrm-en", "deencapsulation", Dependencies.DEENCAPSULATION)
 
     listOf("asm", "asm-tree").forEach {
         implementation("org.ow2.asm", it, Dependencies.ASM)
@@ -171,7 +174,6 @@ artifacts {
 ktlint {
     this.disabledRules.apply {
         add("no-wildcard-imports")
-        add("filename")
     }
 }
 

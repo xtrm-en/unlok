@@ -6,6 +6,7 @@ import codes.som.anthony.koffee.assembleClass
 import codes.som.anthony.koffee.insns.jvm.*
 import codes.som.anthony.koffee.insns.sugar.push_int
 import codes.som.anthony.koffee.modifiers.public
+import dev.xdark.deencapsulation.Deencapsulation
 import me.xtrm.unlok.api.accessor.FieldAccessor
 import me.xtrm.unlok.api.accessor.MethodAccessor
 import me.xtrm.unlok.util.AccessorUtil
@@ -70,6 +71,10 @@ object AccessorBuilder {
     private var accessorIndex = 0
 
     init {
+        try {
+            Deencapsulation.deencapsulate(magicAccessorClass)
+        } catch(_: Throwable) {}
+
         val basePackage =
             magicAccessorClass!!.`package`.name.replace('.', '/') + '/'
 
