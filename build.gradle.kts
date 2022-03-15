@@ -29,6 +29,7 @@ dependencies {
     }
 
     implementation("com.github.stardust-enterprises", "unsafe", "6fd0e048a9")
+    implementation("com.github.xtrm-en", "deencapsulation", "42b829f373")
 
     listOf("asm", "asm-tree").forEach {
         implementation("org.ow2.asm", it, Dependencies.ASM)
