@@ -17,9 +17,10 @@ group = Coordinates.GROUP
 version = Coordinates.VERSION
 
 repositories {
+    mavenLocal()
     mavenCentral()
-    maven("https://jitpack.io")
     maven("https://maven.hackery.site")
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -27,7 +28,7 @@ dependencies {
         implementation("org.jetbrains.kotlin", "kotlin-$it", Dependencies.KOTLIN)
     }
 
-    implementation("com.github.xtrm-en", "deencapsulation", Dependencies.DEENCAPSULATION)
+    implementation("com.github.stardust-enterprises", "unsafe", "6fd0e048a9")
 
     listOf("asm", "asm-tree").forEach {
         implementation("org.ow2.asm", it, Dependencies.ASM)

@@ -1,6 +1,7 @@
 package me.xtrm.unlok.accessor
 
 import me.xtrm.unlok.Unlok
+import net.gudenau.lib.unsafe.Unsafe
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import java.nio.file.Files
@@ -30,7 +31,8 @@ internal object AccessorClassLoader : ClassLoader(Unlok::class.java.classLoader)
      */
     fun load(
         classNode: ClassNode,
-        cwFlags: Int = ClassWriter.COMPUTE_FRAMES
+        cwFlags: Int = ClassWriter.COMPUTE_FRAMES,
+        delegate: Boolean = false,
     ): Class<*> {
         val className = classNode.name
         val bytecode = ClassWriter(cwFlags).also(classNode::accept).toByteArray()
@@ -42,8 +44,21 @@ internal object AccessorClassLoader : ClassLoader(Unlok::class.java.classLoader)
             Files.write(classTarget, bytecode)
         }
 
+        val normalizedClassName = className.replace('/', '.')
+
+        if (delegate) {
+            return Unsafe.defineClass<Any>(
+                normalizedClassName,
+                bytecode,
+                0,
+                bytecode.size,
+                null,
+                null,
+            )
+        }
+
         return this.defineClass(
-            className.replace('/', '.'),
+            normalizedClassName,
             bytecode,
             0,
             bytecode.size
