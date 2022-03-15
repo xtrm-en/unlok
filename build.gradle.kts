@@ -188,7 +188,7 @@ tasks {
 
         mapOf(
             "Created-By" to "${System.getProperty("java.version")} (${System.getProperty("java.vendor")} ${
-                System.getProperty("java.vm.version")
+            System.getProperty("java.vm.version")
             })",
             "Build-Date" to buildDate,
             "Build-Time" to buildTime,
