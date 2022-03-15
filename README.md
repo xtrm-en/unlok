@@ -110,7 +110,7 @@ this project is under the [ISC license][project-license].
 
 [tests]: https://github.com/xtrm-en/unlok/tree/trunk/src/test/kotlin "test source set"
 
-[project-mvnc]: https://maven-badges.herokuapp.com/maven-central/fr.stardustenterprises/unlok "maven central repository"
+[project-mvnc]: https://maven-badges.herokuapp.com/maven-central/me.xtrm/unlok "maven central repository"
 
 [project-gradle-ci]: https://github.com/xtrm-en/unlok/actions/workflows/gradle-ci.yml "gradle ci workflow"
 
