@@ -1,6 +1,5 @@
 package me.xtrm.unlok.util
 
-import dev.xdark.deencapsulation.Deencapsulation
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
@@ -21,13 +20,6 @@ internal object AccessorUtil {
     private val m_getDeclaredFields0 by lazy {
         Class::class.java.getDeclaredMethod("getDeclaredFields0", Boolean::class.java)
             .also { it.isAccessible = true }
-    }
-
-    init {
-        try {
-            Deencapsulation.deencapsulate(Class::class.java)
-        } catch (_: Throwable) {
-        }
     }
 
     /**
