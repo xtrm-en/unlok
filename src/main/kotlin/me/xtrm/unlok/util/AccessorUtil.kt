@@ -24,7 +24,10 @@ internal object AccessorUtil {
     }
 
     init {
-        Deencapsulation.deencapsulate(Class::class.java)
+        try {
+            Deencapsulation.deencapsulate(Class::class.java)
+        } catch (_: Throwable) {
+        }
     }
 
     /**
