@@ -44,7 +44,10 @@ val apiSourceSet = true
 // Add `include` configuration for ShadowJar
 configurations {
     val include by creating
+    // don't include in maven pom
     compileOnly.get().extendsFrom(include)
+    // but also work in tests
+    testImplementation.get().extendsFrom(include)
 }
 
 // Maven Repositories
