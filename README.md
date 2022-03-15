@@ -4,13 +4,20 @@
 
 a property/method accessor library for the [JVM][jvm], written in [Kotlin][kotlin].
 
-# how to use
+# how to import
 
 you can import [unlok][project-url] from [maven central][mvnc] just by adding it to your dependencies:
 
 ## gradle
 
 ```kotlin
+repositories {
+    mavenCentral()
+    
+    // Koffee repository, an Unlok dependency
+    maven("https://maven.hackery.site")
+}
+
 dependencies {
     implementation("me.xtrm:unlok:{VERSION}")
 }
@@ -26,7 +33,7 @@ dependencies {
 </dependency>
 ```
 
-# how does it work
+# how to use
 
 **Note**: you can see more examples in our [tests][tests] source set.
 

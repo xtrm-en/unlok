@@ -6,7 +6,6 @@ import codes.som.anthony.koffee.assembleClass
 import codes.som.anthony.koffee.insns.jvm.*
 import codes.som.anthony.koffee.insns.sugar.push_int
 import codes.som.anthony.koffee.modifiers.public
-import dev.xdark.deencapsulation.Deencapsulation
 import me.xtrm.unlok.api.accessor.FieldAccessor
 import me.xtrm.unlok.api.accessor.MethodAccessor
 import me.xtrm.unlok.util.AccessorUtil
@@ -36,11 +35,9 @@ object AccessorBuilder {
     internal const val UNLOK_BASE_PACKAGE = "unlok"
 
     /**
-     * The canonical name of the [AccessorUtil] class. The reason why we are
-     * not using [Class.getCanonicalName] is that some JDK have 'broken'
-     * implementations of this method, better do it yo'self!
+     * The internal class name of the [AccessorUtil] class.
      */
-    private val ACCESSOR_UTIL_CANONICAL_CLASS_NAME =
+    private val ACCESSOR_UTIL_INTERNAL_NAME =
         AccessorUtil::class.java.name.replace('.', '/')
 
     /**
@@ -71,19 +68,27 @@ object AccessorBuilder {
     private var accessorIndex = 0
 
     init {
-        try {
-            Deencapsulation.deencapsulate(magicAccessorClass)
-        } catch(_: Throwable) {}
-
         val basePackage =
             magicAccessorClass!!.`package`.name.replace('.', '/') + '/'
+
+        val proxyAccessor =
+            assembleClass(
+                public,
+                basePackage + "UnlokProxyAccessor",
+                superName = basePackage + "MagicAccessorImpl"
+            ) {}
 
         UNLOK_ACCESSOR_SUPERCLASS =
             assembleClass(
                 public,
-                basePackage + "UnlokAccessor",
-                superName = basePackage + "MagicAccessorImpl"
-            ) {}.also(AccessorClassLoader::load)
+                "$UNLOK_BASE_PACKAGE/UnlokAccessor",
+                superName = basePackage + "UnlokProxyAccessor"
+            ) {}
+
+        val delegateToBootstrap = basePackage.contains("jdk")
+
+        AccessorClassLoader.load(proxyAccessor, delegate = delegateToBootstrap)
+        AccessorClassLoader.load(UNLOK_ACCESSOR_SUPERCLASS, delegate = delegateToBootstrap)
     }
 
     /**
@@ -337,7 +342,7 @@ object AccessorBuilder {
                     ldc(Type.getType("L$ownerClassName;"))
                     ldc(fieldNode.name)
                     invokestatic(
-                        ACCESSOR_UTIL_CANONICAL_CLASS_NAME,
+                        ACCESSOR_UTIL_INTERNAL_NAME,
                         "setupFinalField",
                         FIELD_TYPE,
                         "java/lang/Class",
@@ -363,7 +368,7 @@ object AccessorBuilder {
                     }
 
                     invokestatic(
-                        ACCESSOR_UTIL_CANONICAL_CLASS_NAME,
+                        ACCESSOR_UTIL_INTERNAL_NAME,
                         "setFinalField",
                         Type.VOID_TYPE,
                         FIELD_TYPE,

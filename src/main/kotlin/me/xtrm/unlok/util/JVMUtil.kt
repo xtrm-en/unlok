@@ -6,7 +6,7 @@ package me.xtrm.unlok.util
  * of these classes were found, the [supportsCurrentVM] method will return
  * false.
  */
-val magicAccessorClass: Class<*>? by lazy {
+internal val magicAccessorClass: Class<*>? by lazy {
     try {
         Class.forName("sun.reflect.MagicAccessorImpl")
     } catch (ex: ClassNotFoundException) {
@@ -22,5 +22,5 @@ val magicAccessorClass: Class<*>? by lazy {
  * @return Whether Unlok supports the current VM.
  * @see magicAccessorClass
  */
-fun supportsCurrentVM(): Boolean =
+internal fun supportsCurrentVM(): Boolean =
     magicAccessorClass != null

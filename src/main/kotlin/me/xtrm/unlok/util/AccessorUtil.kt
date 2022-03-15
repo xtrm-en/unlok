@@ -11,7 +11,7 @@ import java.lang.reflect.Modifier
  * @since 0.0.1
  */
 @Suppress("unused")
-object AccessorUtil {
+internal object AccessorUtil {
     /**
      * Sets the given final field up to be able to access it.
      *
