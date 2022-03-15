@@ -28,7 +28,7 @@ dependencies {
         implementation("org.jetbrains.kotlin", "kotlin-$it", Dependencies.KOTLIN)
     }
 
-    implementation("com.github.stardust-enterprises", "unsafe", "6fd0e048a9")
+    implementation("com.github.stardust-enterprises", "unsafe", "967938cbdc")
     implementation("com.github.xtrm-en", "deencapsulation", "42b829f373")
 
     listOf("asm", "asm-tree").forEach {
