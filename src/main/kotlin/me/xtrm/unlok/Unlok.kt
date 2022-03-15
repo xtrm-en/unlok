@@ -1,6 +1,5 @@
 package me.xtrm.unlok
 
-import dev.xdark.deencapsulation.Deencapsulation
 import me.xtrm.unlok.api.accessor.FieldAccessor
 import me.xtrm.unlok.delegate.FieldDelegate
 import me.xtrm.unlok.delegate.MethodDelegate
@@ -16,11 +15,6 @@ object Unlok {
     init {
         if (!supportsCurrentVM()) {
             throw RuntimeException("Current JVM is not supported by Unlok.")
-        }
-
-        try {
-            Deencapsulation.deencapsulate(Class::class.java)
-        } catch (_: Throwable) {
         }
     }
 

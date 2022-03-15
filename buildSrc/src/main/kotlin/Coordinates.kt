@@ -1,6 +1,9 @@
 object Coordinates {
     const val NAME = "unlok"
     const val DESC = "Unlock your JVM, access any field or method without Reflection."
+    const val VENDOR = "xtrm"
+
+    const val GIT_HOST = "github.com"
     const val REPO_ID = "xtrm-en/$NAME"
 
     const val GROUP = "me.xtrm"
