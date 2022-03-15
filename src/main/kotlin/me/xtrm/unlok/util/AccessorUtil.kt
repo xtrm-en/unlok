@@ -26,7 +26,8 @@ internal object AccessorUtil {
     init {
         try {
             Deencapsulation.deencapsulate(Class::class.java)
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
+            t.printStackTrace()
         }
     }
 
