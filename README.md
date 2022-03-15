@@ -16,21 +16,16 @@ repositories {
     
     // Koffee repository, an Unlok dependency
     maven("https://maven.hackery.site")
+
+    // Github building for:
+    // - xtrm-en/deencapsulation
+    // - stardust-enterprises/unsafe
+    maven("https://jitpack.io")
 }
 
 dependencies {
     implementation("me.xtrm:unlok:{VERSION}")
 }
-```
-
-## maven
-
-```xml
-<dependency>
-    <groupId>me.xtrm</groupId>
-    <artifactId>unlok</artifactId>
-    <version>{VERSION}</version>
-</dependency>
 ```
 
 # how to use

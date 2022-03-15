@@ -1,5 +1,6 @@
 package me.xtrm.unlok.util
 
+import dev.xdark.deencapsulation.Deencapsulation
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
@@ -12,6 +13,20 @@ import java.lang.reflect.Modifier
  */
 @Suppress("unused")
 internal object AccessorUtil {
+
+    /**
+     * Reference to the [Class.getDeclaredFields0] native method,
+     * used to bypass the Reflection field filter.
+     */
+    private val m_getDeclaredFields0 by lazy {
+        Class::class.java.getDeclaredMethod("getDeclaredFields0", Boolean::class.java)
+            .also { it.isAccessible = true }
+    }
+
+    init {
+        Deencapsulation.deencapsulate(Class::class.java)
+    }
+
     /**
      * Sets the given final field up to be able to access it.
      *
@@ -20,12 +35,18 @@ internal object AccessorUtil {
      *
      * @return The set-up field.
      */
+    @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun setupFinalField(holderClass: Class<*>, fieldName: String): Field =
         holderClass.getDeclaredField(fieldName).apply {
             isAccessible = true
-            Field::class.java
-                .getDeclaredField("modifiers")
+            val declaredFields = m_getDeclaredFields0.invoke(
+                Field::class.java,
+                false
+            ) as Array<Field>
+
+            declaredFields
+                .first { it.name.equals("modifiers") }
                 .run {
                     isAccessible = true
                     setInt(
