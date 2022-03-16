@@ -24,6 +24,7 @@ internal object AccessorClassLoader : ClassLoader(Unlok::class.java.classLoader)
      *
      * @param classNode The class node
      * @param cwFlags The [ClassWriter] flags
+     * @param delegate Wheather or not the classloader should delegate class definition to [Unsafe] instead
      *
      * @return The defined class.
      *
