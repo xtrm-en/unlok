@@ -15,7 +15,7 @@ object Dependencies {
     const val ASM = "9.2"
     const val KOFFEE = "8.0.2"
     const val DEENCAPSULATION = "42b829f373"
-    const val UNSAFE = "1.7.1"
+    const val UNSAFE = "1.7.2"
 
     val kotlinModules = arrayOf("stdlib", "reflect")
 }
