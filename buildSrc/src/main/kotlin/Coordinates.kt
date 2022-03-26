@@ -7,7 +7,7 @@ object Coordinates {
     const val REPO_ID = "xtrm-en/$NAME"
 
     const val GROUP = "me.xtrm"
-    const val VERSION = "0.3.1"
+    const val VERSION = "0.4.0"
 }
 
 object Pom {
