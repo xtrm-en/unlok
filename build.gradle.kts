@@ -268,6 +268,10 @@ tasks {
         this.archiveClassifier.set(if (ShadowJar.overrideJar) "" else "all")
         this.manifest.inheritFrom(jar.get().manifest)
 
+        if (apiSourceSet) {
+            from(sourceSets["api"].output)
+        }
+
         ShadowJar.packageRemappings.forEach(this::relocate)
     }
 }
