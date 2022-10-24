@@ -1,0 +1,38 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:me.xtrm.unlok.accessor////PointingToDeclaration/unlok/me.xtrm.unlok.accessor/index.html
+$dokka.location:me.xtrm.unlok.accessor/AccessorBuilder///PointingToDeclaration/unlok/me.xtrm.unlok.accessor/-accessor-builder/index.html
+$dokka.location:me.xtrm.unlok.accessor/AccessorBuilder/fieldAccessor/#kotlin.String#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok.accessor/-accessor-builder/field-accessor.html
+$dokka.location:me.xtrm.unlok.accessor/AccessorBuilder/methodAccessor/#kotlin.String#kotlin.String#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok.accessor/-accessor-builder/method-accessor.html
+$dokka.location:me.xtrm.unlok.accessor/AccessorCache///PointingToDeclaration/unlok/me.xtrm.unlok.accessor/-accessor-cache/index.html
+$dokka.location:me.xtrm.unlok.accessor/AccessorCache/AccessorCache/#kotlin.collections.MutableMap[kotlin.Int,me.xtrm.unlok.api.accessor.FieldAccessor[*]]#kotlin.collections.MutableMap[kotlin.Int,me.xtrm.unlok.api.accessor.FieldAccessor[*]]#kotlin.collections.MutableMap[kotlin.Int,me.xtrm.unlok.api.accessor.MethodAccessor[*]]#kotlin.collections.MutableMap[kotlin.Int,me.xtrm.unlok.api.accessor.MethodAccessor[*]]#kotlin.collections.MutableMap[kotlin.String,org.objectweb.asm.tree.ClassNode]/PointingToDeclaration/unlok/me.xtrm.unlok.accessor/-accessor-cache/-accessor-cache.html
+$dokka.location:me.xtrm.unlok.accessor/AccessorCache/classCache/#/PointingToDeclaration/unlok/me.xtrm.unlok.accessor/-accessor-cache/class-cache.html
+$dokka.location:me.xtrm.unlok.accessor/AccessorCache/fieldStaticCache/#/PointingToDeclaration/unlok/me.xtrm.unlok.accessor/-accessor-cache/field-static-cache.html
+$dokka.location:me.xtrm.unlok.accessor/AccessorCache/fieldVirtualCache/#/PointingToDeclaration/unlok/me.xtrm.unlok.accessor/-accessor-cache/field-virtual-cache.html
+$dokka.location:me.xtrm.unlok.accessor/AccessorCache/methodStaticCache/#/PointingToDeclaration/unlok/me.xtrm.unlok.accessor/-accessor-cache/method-static-cache.html
+$dokka.location:me.xtrm.unlok.accessor/AccessorCache/methodVirtualCache/#/PointingToDeclaration/unlok/me.xtrm.unlok.accessor/-accessor-cache/method-virtual-cache.html
+$dokka.location:me.xtrm.unlok.delegate////PointingToDeclaration/unlok/me.xtrm.unlok.delegate/index.html
+$dokka.location:me.xtrm.unlok.delegate/FieldDelegate///PointingToDeclaration/unlok/me.xtrm.unlok.delegate/-field-delegate/index.html
+$dokka.location:me.xtrm.unlok.delegate/FieldDelegate/FieldDelegate/#kotlin.String#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok.delegate/-field-delegate/-field-delegate.html
+$dokka.location:me.xtrm.unlok.delegate/FieldDelegate/getValue/#TypeParam(bounds=[kotlin.Any?])?#kotlin.reflect.KProperty[*]/PointingToDeclaration/unlok/me.xtrm.unlok.delegate/-field-delegate/get-value.html
+$dokka.location:me.xtrm.unlok.delegate/FieldDelegate/setValue/#TypeParam(bounds=[kotlin.Any?])?#kotlin.reflect.KProperty[*]#TypeParam(bounds=[kotlin.Any?])?/PointingToDeclaration/unlok/me.xtrm.unlok.delegate/-field-delegate/set-value.html
+$dokka.location:me.xtrm.unlok.delegate/MethodDelegate///PointingToDeclaration/unlok/me.xtrm.unlok.delegate/-method-delegate/index.html
+$dokka.location:me.xtrm.unlok.delegate/MethodDelegate/MethodDelegate/#kotlin.String#kotlin.String#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok.delegate/-method-delegate/-method-delegate.html
+$dokka.location:me.xtrm.unlok.delegate/MethodDelegate/getValue/#kotlin.Any?#kotlin.reflect.KProperty[*]/PointingToDeclaration/unlok/me.xtrm.unlok.delegate/-method-delegate/get-value.html
+$dokka.location:me.xtrm.unlok.delegate/MethodDelegate/invoke/#kotlin.Array[kotlin.Any?]/PointingToDeclaration/unlok/me.xtrm.unlok.delegate/-method-delegate/invoke.html
+$dokka.location:me.xtrm.unlok.dsl////PointingToDeclaration/unlok/me.xtrm.unlok.dsl/index.html
+$dokka.location:me.xtrm.unlok.dsl//field/#kotlin.String#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok.dsl/field.html
+$dokka.location:me.xtrm.unlok.dsl//field/java.lang.Class[*]#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok.dsl/field.html
+$dokka.location:me.xtrm.unlok.dsl//field/kotlin.reflect.KClass[*]#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok.dsl/field.html
+$dokka.location:me.xtrm.unlok.dsl//method/#kotlin.String#kotlin.String#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok.dsl/method.html
+$dokka.location:me.xtrm.unlok.dsl//method/java.lang.Class[*]#kotlin.String#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok.dsl/method.html
+$dokka.location:me.xtrm.unlok.dsl//method/kotlin.reflect.KClass[*]#kotlin.String#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok.dsl/method.html
+$dokka.location:me.xtrm.unlok////PointingToDeclaration/unlok/me.xtrm.unlok/index.html
+$dokka.location:me.xtrm.unlok/Unlok///PointingToDeclaration/unlok/me.xtrm.unlok/-unlok/index.html
+$dokka.location:me.xtrm.unlok/Unlok/field/#kotlin.String#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok/-unlok/field.html
+$dokka.location:me.xtrm.unlok/Unlok/method/#kotlin.String#kotlin.String#kotlin.String#kotlin.Any?/PointingToDeclaration/unlok/me.xtrm.unlok/-unlok/method.html
+me.xtrm.unlok
+me.xtrm.unlok.accessor
+me.xtrm.unlok.delegate
+me.xtrm.unlok.dsl
+
